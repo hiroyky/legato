@@ -1,0 +1,19 @@
+# genre.graphqls
+
+type Genre implements Node {
+    id: ID!
+    name: String!
+    tracks: [Track]
+    trackPagination: TrackPagination!
+}
+
+type GenreEdge implements Edge {
+    cursor: Cursor!
+    node: Genre!
+}
+
+type GenrePagination implements Pagination {
+    pageInfo: PaginationInfo!
+    edges: [GenreEdge!]!
+    nodes: [Genre!]!
+}
