@@ -1,0 +1,43 @@
+scalar Cursor
+scalar Timestamp
+
+interface Node {
+    id: ID!
+}
+
+# 一般的なページネーション(limit, offsetを用いる)
+interface Pagination {
+    pageInfo: PaginationInfo!
+    edges: [Edge!]!
+    nodes: [Node!]!
+}
+
+# GraphQLでよく使われるRelayのカーソル式ページネーション
+interface Connection {
+    pageInfo: PageInfo!
+    edges: [Edge!]!
+    nodes: [Node!]!
+}
+
+interface Edge {
+    cursor: Cursor!
+    node: Node!
+}
+
+type PaginationInfo {
+    page: Int!
+    paginationLength: Int!
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    count: Int!
+    totalCount: Int!
+    limit: Int!
+    offset: Int!
+}
+
+type PageInfo {
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    startCursor: Cursor
+    endCursor: Cursor
+}

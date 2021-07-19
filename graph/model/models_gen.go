@@ -2,19 +2,144 @@
 
 package model
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type Connection interface {
+	IsConnection()
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+type Edge interface {
+	IsEdge()
 }
 
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type Node interface {
+	IsNode()
 }
+
+type Pagination interface {
+	IsPagination()
+}
+
+type Album struct {
+	ID          string       `json:"id"`
+	Name        string       `json:"name"`
+	DiskNo      int          `json:"diskNo"`
+	DiskTotal   int          `json:"diskTotal"`
+	AlbumArtist *AlbumArtist `json:"albumArtist"`
+	Tracks      []*Track     `json:"tracks"`
+}
+
+func (Album) IsNode() {}
+
+type AlbumArtist struct {
+	ID              string                 `json:"id"`
+	Name            string                 `json:"name"`
+	Albums          []*Album               `json:"albums"`
+	AlbumPagination *AlbumArtistPagination `json:"albumPagination"`
+	Tracks          []*Track               `json:"tracks"`
+	TrackPagination *TrackPagination       `json:"trackPagination"`
+}
+
+func (AlbumArtist) IsNode() {}
+
+type AlbumArtistEdge struct {
+	Cursor string       `json:"cursor"`
+	Node   *AlbumArtist `json:"node"`
+}
+
+func (AlbumArtistEdge) IsEdge() {}
+
+type AlbumArtistPagination struct {
+	PageInfo *PaginationInfo    `json:"pageInfo"`
+	Edges    []*AlbumArtistEdge `json:"edges"`
+	Nodes    []*AlbumArtist     `json:"nodes"`
+}
+
+func (AlbumArtistPagination) IsPagination() {}
+
+type AlbumEdge struct {
+	Cursor string `json:"cursor"`
+	Node   *Album `json:"node"`
+}
+
+func (AlbumEdge) IsEdge() {}
+
+type AlbumPagination struct {
+	PageInfo *PaginationInfo `json:"pageInfo"`
+	Edges    []*AlbumEdge    `json:"edges"`
+	Nodes    []*Album        `json:"nodes"`
+}
+
+func (AlbumPagination) IsPagination() {}
+
+type Genre struct {
+	ID              string           `json:"id"`
+	Name            string           `json:"name"`
+	Tracks          []*Track         `json:"tracks"`
+	TrackPagination *TrackPagination `json:"trackPagination"`
+}
+
+func (Genre) IsNode() {}
+
+type GenreEdge struct {
+	Cursor string `json:"cursor"`
+	Node   *Genre `json:"node"`
+}
+
+func (GenreEdge) IsEdge() {}
+
+type GenrePagination struct {
+	PageInfo *PaginationInfo `json:"pageInfo"`
+	Edges    []*GenreEdge    `json:"edges"`
+	Nodes    []*Genre        `json:"nodes"`
+}
+
+func (GenrePagination) IsPagination() {}
+
+type PageInfo struct {
+	HasNextPage     bool    `json:"hasNextPage"`
+	HasPreviousPage bool    `json:"hasPreviousPage"`
+	StartCursor     *string `json:"startCursor"`
+	EndCursor       *string `json:"endCursor"`
+}
+
+type PaginationInfo struct {
+	Page             int  `json:"page"`
+	PaginationLength int  `json:"paginationLength"`
+	HasNextPage      bool `json:"hasNextPage"`
+	HasPreviousPage  bool `json:"hasPreviousPage"`
+	Count            int  `json:"count"`
+	TotalCount       int  `json:"totalCount"`
+	Limit            int  `json:"limit"`
+	Offset           int  `json:"offset"`
+}
+
+type Track struct {
+	ID          string       `json:"id"`
+	Title       string       `json:"title"`
+	Artist      string       `json:"artist"`
+	Composer    string       `json:"composer"`
+	TrackNo     int          `json:"trackNo"`
+	Lyrics      string       `json:"lyrics"`
+	Comment     string       `json:"comment"`
+	Year        int          `json:"year"`
+	URL         string       `json:"url"`
+	Album       *Album       `json:"album"`
+	Genre       *Genre       `json:"genre"`
+	AlbumArtist *AlbumArtist `json:"albumArtist"`
+}
+
+func (Track) IsNode() {}
+
+type TrackEdge struct {
+	Cursor string `json:"cursor"`
+	Node   *Track `json:"node"`
+}
+
+func (TrackEdge) IsEdge() {}
+
+type TrackPagination struct {
+	PageInfo *PaginationInfo `json:"pageInfo"`
+	Edges    []*TrackEdge    `json:"edges"`
+	Nodes    []*Track        `json:"nodes"`
+}
+
+func (TrackPagination) IsPagination() {}

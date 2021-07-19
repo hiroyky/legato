@@ -1,0 +1,21 @@
+# album.graphqls
+
+type Album implements Node {
+    id: ID!
+    name: String!
+    diskNo: Int!
+    diskTotal: Int!
+    albumArtist: AlbumArtist!
+    tracks: [Track]
+}
+
+type AlbumEdge implements Edge {
+    cursor: Cursor!
+    node: Album!
+}
+
+type AlbumPagination implements Pagination {
+    pageInfo: PaginationInfo!
+    edges: [AlbumEdge!]!
+    nodes: [Album!]!
+}
