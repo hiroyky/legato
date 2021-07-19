@@ -1,0 +1,27 @@
+# track.graphqls
+
+type Track implements Node {
+    id: ID!
+    title: String!
+    artist: String!
+    composer: String!
+    trackNo: Int!
+    lyrics: String!
+    comment: String!
+    year: Int!
+    url: String!
+    album: Album!
+    genre: Genre!
+    albumArtist: AlbumArtist!
+}
+
+type TrackEdge implements Edge {
+    cursor: Cursor!
+    node: Track!
+}
+
+type TrackPagination implements Pagination {
+    pageInfo: PaginationInfo!
+    edges: [TrackEdge!]!
+    nodes: [Track!]!
+}

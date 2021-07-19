@@ -1,0 +1,12 @@
+# query.graphqls
+
+type Query {
+    track(id: ID!): Track
+    tracks(limit: Int!, offset: Int): TrackPagination!
+    album(id: ID!): Album
+    albums(limit: Int!, offset: Int): AlbumPagination!
+    albumArtist(id: ID!): AlbumArtist
+    albumArtists(limit: Int!, offset: Int): AlbumArtistPagination!
+    genre(id: ID!): Genre
+    genres(limit: Int!, offset: Int): GenrePagination!
+}
