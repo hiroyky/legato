@@ -1,0 +1,13 @@
+pkgname = "model"
+output = "database/generated/model"
+
+wipe     = true
+no-tests = true
+
+[mysql]
+dbname="legato_db"
+host="localhost"
+port=3306
+user="root"
+pass="password"
+sslmode="false"
