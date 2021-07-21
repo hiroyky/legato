@@ -5,11 +5,11 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-type Environment struct {
+type environment struct {
 	Port int64 `envconfig:"PORT"`
 }
 
-var Env *Environment
+var Env environment
 
 func init() {
 	godotenv.Load()

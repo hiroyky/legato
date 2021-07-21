@@ -1,0 +1,32 @@
+version: '3.3'
+networks:
+  legato_network:
+
+services:
+  legato:
+    image: legato
+    container_name: legato
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    networks:
+      - legato_network
+    volumes:
+      - ./go.mod:/go/src/gihtub.com/hiroyky/legato/go.mod
+      - ./go.sum:/go/src/gihtub.com/hiroyky/legato/go.sum
+    depends_on:
+      - mysql
+  mysql:
+    image: mysql:8.0
+    container_name: legato_mysqldb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - ./dbschema/:/docker-entrypoint-initdb.d/
+    ports:
+      - 3306:3306
+    networks:
+      - legato_network
