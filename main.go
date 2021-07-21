@@ -1,29 +1,13 @@
 package main
 
 import (
-	"log"
-	"net/http"
-	"os"
-
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/legato/graph"
-	"github.com/legato/graph/generated"
+	"fmt"
+	"github.com/legato/infrastructure/config"
+	"github.com/legato/interface/router"
 )
 
-const defaultPort = "8080"
-
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = defaultPort
+	if err := router.Router.Run(fmt.Sprintf(":%d", config.Env.Port)); err != nil {
+		panic(err)
 	}
-
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
-
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
-
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
