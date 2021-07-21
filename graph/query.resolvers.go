@@ -8,38 +8,38 @@ import (
 	"fmt"
 
 	"github.com/legato/graph/generated"
-	"github.com/legato/graph/model"
+	"github.com/legato/graph/gqlmodel"
 )
 
-func (r *queryResolver) Track(ctx context.Context, id string) (*model.Track, error) {
+func (r *queryResolver) Track(ctx context.Context, id string) (*gqlmodel.Track, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Tracks(ctx context.Context, limit int, offset *int) (*model.TrackPagination, error) {
+func (r *queryResolver) Tracks(ctx context.Context, limit int, offset *int) (*gqlmodel.TrackPagination, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Album(ctx context.Context, id string) (*model.Album, error) {
+func (r *queryResolver) Album(ctx context.Context, id string) (*gqlmodel.Album, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Albums(ctx context.Context, limit int, offset *int) (*model.AlbumPagination, error) {
+func (r *queryResolver) Albums(ctx context.Context, limit int, offset *int) (*gqlmodel.AlbumPagination, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) AlbumArtist(ctx context.Context, id string) (*model.AlbumArtist, error) {
+func (r *queryResolver) AlbumArtist(ctx context.Context, id string) (*gqlmodel.AlbumArtist, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) AlbumArtists(ctx context.Context, limit int, offset *int) (*model.AlbumArtistPagination, error) {
+func (r *queryResolver) AlbumArtists(ctx context.Context, limit int, offset *int) (*gqlmodel.AlbumArtistPagination, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Genre(ctx context.Context, id string) (*model.Genre, error) {
+func (r *queryResolver) Genre(ctx context.Context, id string) (*gqlmodel.Genre, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Genres(ctx context.Context, limit int, offset *int) (*model.GenrePagination, error) {
+func (r *queryResolver) Genres(ctx context.Context, limit int, offset *int) (*gqlmodel.GenrePagination, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
