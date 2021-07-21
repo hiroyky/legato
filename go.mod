@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/99designs/gqlgen v0.13.0
+	github.com/dhowden/tag v0.0.0-20201120070457-d52dcb253c63
 	github.com/friendsofgo/errors v0.9.2
 	github.com/gin-gonic/gin v1.7.2
 	github.com/joho/godotenv v1.3.0
