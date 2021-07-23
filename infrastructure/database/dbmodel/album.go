@@ -26,6 +26,8 @@ type Album struct {
 	AlbumID       int       `boil:"album_id" json:"album_id" toml:"album_id" yaml:"album_id"`
 	Name          string    `boil:"name" json:"name" toml:"name" yaml:"name"`
 	AlbumArtistID int       `boil:"album_artist_id" json:"album_artist_id" toml:"album_artist_id" yaml:"album_artist_id"`
+	DiscNo        int       `boil:"disc_no" json:"disc_no" toml:"disc_no" yaml:"disc_no"`
+	DiscTotal     int       `boil:"disc_total" json:"disc_total" toml:"disc_total" yaml:"disc_total"`
 	CreatedAt     time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt     time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
@@ -37,12 +39,16 @@ var AlbumColumns = struct {
 	AlbumID       string
 	Name          string
 	AlbumArtistID string
+	DiscNo        string
+	DiscTotal     string
 	CreatedAt     string
 	UpdatedAt     string
 }{
 	AlbumID:       "album_id",
 	Name:          "name",
 	AlbumArtistID: "album_artist_id",
+	DiscNo:        "disc_no",
+	DiscTotal:     "disc_total",
 	CreatedAt:     "created_at",
 	UpdatedAt:     "updated_at",
 }
@@ -51,12 +57,16 @@ var AlbumTableColumns = struct {
 	AlbumID       string
 	Name          string
 	AlbumArtistID string
+	DiscNo        string
+	DiscTotal     string
 	CreatedAt     string
 	UpdatedAt     string
 }{
 	AlbumID:       "album.album_id",
 	Name:          "album.name",
 	AlbumArtistID: "album.album_artist_id",
+	DiscNo:        "album.disc_no",
+	DiscTotal:     "album.disc_total",
 	CreatedAt:     "album.created_at",
 	UpdatedAt:     "album.updated_at",
 }
@@ -134,12 +144,16 @@ var AlbumWhere = struct {
 	AlbumID       whereHelperint
 	Name          whereHelperstring
 	AlbumArtistID whereHelperint
+	DiscNo        whereHelperint
+	DiscTotal     whereHelperint
 	CreatedAt     whereHelpertime_Time
 	UpdatedAt     whereHelpertime_Time
 }{
 	AlbumID:       whereHelperint{field: "`album`.`album_id`"},
 	Name:          whereHelperstring{field: "`album`.`name`"},
 	AlbumArtistID: whereHelperint{field: "`album`.`album_artist_id`"},
+	DiscNo:        whereHelperint{field: "`album`.`disc_no`"},
+	DiscTotal:     whereHelperint{field: "`album`.`disc_total`"},
 	CreatedAt:     whereHelpertime_Time{field: "`album`.`created_at`"},
 	UpdatedAt:     whereHelpertime_Time{field: "`album`.`updated_at`"},
 }
@@ -168,8 +182,8 @@ func (*albumR) NewStruct() *albumR {
 type albumL struct{}
 
 var (
-	albumAllColumns            = []string{"album_id", "name", "album_artist_id", "created_at", "updated_at"}
-	albumColumnsWithoutDefault = []string{"name", "album_artist_id", "created_at", "updated_at"}
+	albumAllColumns            = []string{"album_id", "name", "album_artist_id", "disc_no", "disc_total", "created_at", "updated_at"}
+	albumColumnsWithoutDefault = []string{"name", "album_artist_id", "disc_no", "disc_total", "created_at", "updated_at"}
 	albumColumnsWithDefault    = []string{"album_id"}
 	albumPrimaryKeyColumns     = []string{"album_id"}
 )

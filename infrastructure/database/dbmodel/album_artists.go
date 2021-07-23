@@ -25,8 +25,7 @@ import (
 type AlbumArtist struct {
 	AlbumArtistID int       `boil:"album_artist_id" json:"album_artist_id" toml:"album_artist_id" yaml:"album_artist_id"`
 	Name          string    `boil:"name" json:"name" toml:"name" yaml:"name"`
-	DiskNo        int       `boil:"disk_no" json:"disk_no" toml:"disk_no" yaml:"disk_no"`
-	DiskTotal     int       `boil:"disk_total" json:"disk_total" toml:"disk_total" yaml:"disk_total"`
+	NameHash      string    `boil:"name_hash" json:"name_hash" toml:"name_hash" yaml:"name_hash"`
 	CreatedAt     time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt     time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
@@ -37,15 +36,13 @@ type AlbumArtist struct {
 var AlbumArtistColumns = struct {
 	AlbumArtistID string
 	Name          string
-	DiskNo        string
-	DiskTotal     string
+	NameHash      string
 	CreatedAt     string
 	UpdatedAt     string
 }{
 	AlbumArtistID: "album_artist_id",
 	Name:          "name",
-	DiskNo:        "disk_no",
-	DiskTotal:     "disk_total",
+	NameHash:      "name_hash",
 	CreatedAt:     "created_at",
 	UpdatedAt:     "updated_at",
 }
@@ -53,15 +50,13 @@ var AlbumArtistColumns = struct {
 var AlbumArtistTableColumns = struct {
 	AlbumArtistID string
 	Name          string
-	DiskNo        string
-	DiskTotal     string
+	NameHash      string
 	CreatedAt     string
 	UpdatedAt     string
 }{
 	AlbumArtistID: "album_artists.album_artist_id",
 	Name:          "album_artists.name",
-	DiskNo:        "album_artists.disk_no",
-	DiskTotal:     "album_artists.disk_total",
+	NameHash:      "album_artists.name_hash",
 	CreatedAt:     "album_artists.created_at",
 	UpdatedAt:     "album_artists.updated_at",
 }
@@ -71,15 +66,13 @@ var AlbumArtistTableColumns = struct {
 var AlbumArtistWhere = struct {
 	AlbumArtistID whereHelperint
 	Name          whereHelperstring
-	DiskNo        whereHelperint
-	DiskTotal     whereHelperint
+	NameHash      whereHelperstring
 	CreatedAt     whereHelpertime_Time
 	UpdatedAt     whereHelpertime_Time
 }{
 	AlbumArtistID: whereHelperint{field: "`album_artists`.`album_artist_id`"},
 	Name:          whereHelperstring{field: "`album_artists`.`name`"},
-	DiskNo:        whereHelperint{field: "`album_artists`.`disk_no`"},
-	DiskTotal:     whereHelperint{field: "`album_artists`.`disk_total`"},
+	NameHash:      whereHelperstring{field: "`album_artists`.`name_hash`"},
 	CreatedAt:     whereHelpertime_Time{field: "`album_artists`.`created_at`"},
 	UpdatedAt:     whereHelpertime_Time{field: "`album_artists`.`updated_at`"},
 }
@@ -108,8 +101,8 @@ func (*albumArtistR) NewStruct() *albumArtistR {
 type albumArtistL struct{}
 
 var (
-	albumArtistAllColumns            = []string{"album_artist_id", "name", "disk_no", "disk_total", "created_at", "updated_at"}
-	albumArtistColumnsWithoutDefault = []string{"album_artist_id", "name", "disk_no", "disk_total", "created_at", "updated_at"}
+	albumArtistAllColumns            = []string{"album_artist_id", "name", "name_hash", "created_at", "updated_at"}
+	albumArtistColumnsWithoutDefault = []string{"album_artist_id", "name", "name_hash", "created_at", "updated_at"}
 	albumArtistColumnsWithDefault    = []string{}
 	albumArtistPrimaryKeyColumns     = []string{"album_artist_id"}
 )
@@ -1010,6 +1003,7 @@ func (o AlbumArtistSlice) UpdateAll(ctx context.Context, exec boil.ContextExecut
 
 var mySQLAlbumArtistUniqueColumns = []string{
 	"album_artist_id",
+	"name_hash",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.

@@ -23,149 +23,149 @@ import (
 
 // Track is an object representing the database table.
 type Track struct {
-	TrackID         int       `boil:"track_id" json:"track_id" toml:"track_id" yaml:"track_id"`
-	Title           string    `boil:"title" json:"title" toml:"title" yaml:"title"`
-	Artist          string    `boil:"artist" json:"artist" toml:"artist" yaml:"artist"`
-	Composer        string    `boil:"composer" json:"composer" toml:"composer" yaml:"composer"`
-	TrackNo         int       `boil:"track_no" json:"track_no" toml:"track_no" yaml:"track_no"`
-	Lyrics          string    `boil:"lyrics" json:"lyrics" toml:"lyrics" yaml:"lyrics"`
-	Comment         string    `boil:"comment" json:"comment" toml:"comment" yaml:"comment"`
-	Year            int       `boil:"year" json:"year" toml:"year" yaml:"year"`
-	FilePath        string    `boil:"file_path" json:"file_path" toml:"file_path" yaml:"file_path"`
-	FilePathMD5Hash string    `boil:"file_path_md5_hash" json:"file_path_md5_hash" toml:"file_path_md5_hash" yaml:"file_path_md5_hash"`
-	FileMD5Hash     string    `boil:"file_md5_hash" json:"file_md5_hash" toml:"file_md5_hash" yaml:"file_md5_hash"`
-	Format          string    `boil:"format" json:"format" toml:"format" yaml:"format"`
-	FileType        string    `boil:"file_type" json:"file_type" toml:"file_type" yaml:"file_type"`
-	AlbumArtistID   int       `boil:"album_artist_id" json:"album_artist_id" toml:"album_artist_id" yaml:"album_artist_id"`
-	AlbumID         int       `boil:"album_id" json:"album_id" toml:"album_id" yaml:"album_id"`
-	GenreID         int       `boil:"genre_id" json:"genre_id" toml:"genre_id" yaml:"genre_id"`
-	CreatedAt       time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt       time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	TrackID       int       `boil:"track_id" json:"track_id" toml:"track_id" yaml:"track_id"`
+	Title         string    `boil:"title" json:"title" toml:"title" yaml:"title"`
+	Artist        string    `boil:"artist" json:"artist" toml:"artist" yaml:"artist"`
+	Composer      string    `boil:"composer" json:"composer" toml:"composer" yaml:"composer"`
+	TrackNo       int       `boil:"track_no" json:"track_no" toml:"track_no" yaml:"track_no"`
+	Lyrics        string    `boil:"lyrics" json:"lyrics" toml:"lyrics" yaml:"lyrics"`
+	Comment       string    `boil:"comment" json:"comment" toml:"comment" yaml:"comment"`
+	Year          int       `boil:"year" json:"year" toml:"year" yaml:"year"`
+	FilePath      string    `boil:"file_path" json:"file_path" toml:"file_path" yaml:"file_path"`
+	FilePathHash  string    `boil:"file_path_hash" json:"file_path_hash" toml:"file_path_hash" yaml:"file_path_hash"`
+	FileHash      string    `boil:"file_hash" json:"file_hash" toml:"file_hash" yaml:"file_hash"`
+	Format        string    `boil:"format" json:"format" toml:"format" yaml:"format"`
+	FileType      string    `boil:"file_type" json:"file_type" toml:"file_type" yaml:"file_type"`
+	AlbumArtistID int       `boil:"album_artist_id" json:"album_artist_id" toml:"album_artist_id" yaml:"album_artist_id"`
+	AlbumID       int       `boil:"album_id" json:"album_id" toml:"album_id" yaml:"album_id"`
+	GenreID       int       `boil:"genre_id" json:"genre_id" toml:"genre_id" yaml:"genre_id"`
+	CreatedAt     time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt     time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *trackR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L trackL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var TrackColumns = struct {
-	TrackID         string
-	Title           string
-	Artist          string
-	Composer        string
-	TrackNo         string
-	Lyrics          string
-	Comment         string
-	Year            string
-	FilePath        string
-	FilePathMD5Hash string
-	FileMD5Hash     string
-	Format          string
-	FileType        string
-	AlbumArtistID   string
-	AlbumID         string
-	GenreID         string
-	CreatedAt       string
-	UpdatedAt       string
+	TrackID       string
+	Title         string
+	Artist        string
+	Composer      string
+	TrackNo       string
+	Lyrics        string
+	Comment       string
+	Year          string
+	FilePath      string
+	FilePathHash  string
+	FileHash      string
+	Format        string
+	FileType      string
+	AlbumArtistID string
+	AlbumID       string
+	GenreID       string
+	CreatedAt     string
+	UpdatedAt     string
 }{
-	TrackID:         "track_id",
-	Title:           "title",
-	Artist:          "artist",
-	Composer:        "composer",
-	TrackNo:         "track_no",
-	Lyrics:          "lyrics",
-	Comment:         "comment",
-	Year:            "year",
-	FilePath:        "file_path",
-	FilePathMD5Hash: "file_path_md5_hash",
-	FileMD5Hash:     "file_md5_hash",
-	Format:          "format",
-	FileType:        "file_type",
-	AlbumArtistID:   "album_artist_id",
-	AlbumID:         "album_id",
-	GenreID:         "genre_id",
-	CreatedAt:       "created_at",
-	UpdatedAt:       "updated_at",
+	TrackID:       "track_id",
+	Title:         "title",
+	Artist:        "artist",
+	Composer:      "composer",
+	TrackNo:       "track_no",
+	Lyrics:        "lyrics",
+	Comment:       "comment",
+	Year:          "year",
+	FilePath:      "file_path",
+	FilePathHash:  "file_path_hash",
+	FileHash:      "file_hash",
+	Format:        "format",
+	FileType:      "file_type",
+	AlbumArtistID: "album_artist_id",
+	AlbumID:       "album_id",
+	GenreID:       "genre_id",
+	CreatedAt:     "created_at",
+	UpdatedAt:     "updated_at",
 }
 
 var TrackTableColumns = struct {
-	TrackID         string
-	Title           string
-	Artist          string
-	Composer        string
-	TrackNo         string
-	Lyrics          string
-	Comment         string
-	Year            string
-	FilePath        string
-	FilePathMD5Hash string
-	FileMD5Hash     string
-	Format          string
-	FileType        string
-	AlbumArtistID   string
-	AlbumID         string
-	GenreID         string
-	CreatedAt       string
-	UpdatedAt       string
+	TrackID       string
+	Title         string
+	Artist        string
+	Composer      string
+	TrackNo       string
+	Lyrics        string
+	Comment       string
+	Year          string
+	FilePath      string
+	FilePathHash  string
+	FileHash      string
+	Format        string
+	FileType      string
+	AlbumArtistID string
+	AlbumID       string
+	GenreID       string
+	CreatedAt     string
+	UpdatedAt     string
 }{
-	TrackID:         "tracks.track_id",
-	Title:           "tracks.title",
-	Artist:          "tracks.artist",
-	Composer:        "tracks.composer",
-	TrackNo:         "tracks.track_no",
-	Lyrics:          "tracks.lyrics",
-	Comment:         "tracks.comment",
-	Year:            "tracks.year",
-	FilePath:        "tracks.file_path",
-	FilePathMD5Hash: "tracks.file_path_md5_hash",
-	FileMD5Hash:     "tracks.file_md5_hash",
-	Format:          "tracks.format",
-	FileType:        "tracks.file_type",
-	AlbumArtistID:   "tracks.album_artist_id",
-	AlbumID:         "tracks.album_id",
-	GenreID:         "tracks.genre_id",
-	CreatedAt:       "tracks.created_at",
-	UpdatedAt:       "tracks.updated_at",
+	TrackID:       "tracks.track_id",
+	Title:         "tracks.title",
+	Artist:        "tracks.artist",
+	Composer:      "tracks.composer",
+	TrackNo:       "tracks.track_no",
+	Lyrics:        "tracks.lyrics",
+	Comment:       "tracks.comment",
+	Year:          "tracks.year",
+	FilePath:      "tracks.file_path",
+	FilePathHash:  "tracks.file_path_hash",
+	FileHash:      "tracks.file_hash",
+	Format:        "tracks.format",
+	FileType:      "tracks.file_type",
+	AlbumArtistID: "tracks.album_artist_id",
+	AlbumID:       "tracks.album_id",
+	GenreID:       "tracks.genre_id",
+	CreatedAt:     "tracks.created_at",
+	UpdatedAt:     "tracks.updated_at",
 }
 
 // Generated where
 
 var TrackWhere = struct {
-	TrackID         whereHelperint
-	Title           whereHelperstring
-	Artist          whereHelperstring
-	Composer        whereHelperstring
-	TrackNo         whereHelperint
-	Lyrics          whereHelperstring
-	Comment         whereHelperstring
-	Year            whereHelperint
-	FilePath        whereHelperstring
-	FilePathMD5Hash whereHelperstring
-	FileMD5Hash     whereHelperstring
-	Format          whereHelperstring
-	FileType        whereHelperstring
-	AlbumArtistID   whereHelperint
-	AlbumID         whereHelperint
-	GenreID         whereHelperint
-	CreatedAt       whereHelpertime_Time
-	UpdatedAt       whereHelpertime_Time
+	TrackID       whereHelperint
+	Title         whereHelperstring
+	Artist        whereHelperstring
+	Composer      whereHelperstring
+	TrackNo       whereHelperint
+	Lyrics        whereHelperstring
+	Comment       whereHelperstring
+	Year          whereHelperint
+	FilePath      whereHelperstring
+	FilePathHash  whereHelperstring
+	FileHash      whereHelperstring
+	Format        whereHelperstring
+	FileType      whereHelperstring
+	AlbumArtistID whereHelperint
+	AlbumID       whereHelperint
+	GenreID       whereHelperint
+	CreatedAt     whereHelpertime_Time
+	UpdatedAt     whereHelpertime_Time
 }{
-	TrackID:         whereHelperint{field: "`tracks`.`track_id`"},
-	Title:           whereHelperstring{field: "`tracks`.`title`"},
-	Artist:          whereHelperstring{field: "`tracks`.`artist`"},
-	Composer:        whereHelperstring{field: "`tracks`.`composer`"},
-	TrackNo:         whereHelperint{field: "`tracks`.`track_no`"},
-	Lyrics:          whereHelperstring{field: "`tracks`.`lyrics`"},
-	Comment:         whereHelperstring{field: "`tracks`.`comment`"},
-	Year:            whereHelperint{field: "`tracks`.`year`"},
-	FilePath:        whereHelperstring{field: "`tracks`.`file_path`"},
-	FilePathMD5Hash: whereHelperstring{field: "`tracks`.`file_path_md5_hash`"},
-	FileMD5Hash:     whereHelperstring{field: "`tracks`.`file_md5_hash`"},
-	Format:          whereHelperstring{field: "`tracks`.`format`"},
-	FileType:        whereHelperstring{field: "`tracks`.`file_type`"},
-	AlbumArtistID:   whereHelperint{field: "`tracks`.`album_artist_id`"},
-	AlbumID:         whereHelperint{field: "`tracks`.`album_id`"},
-	GenreID:         whereHelperint{field: "`tracks`.`genre_id`"},
-	CreatedAt:       whereHelpertime_Time{field: "`tracks`.`created_at`"},
-	UpdatedAt:       whereHelpertime_Time{field: "`tracks`.`updated_at`"},
+	TrackID:       whereHelperint{field: "`tracks`.`track_id`"},
+	Title:         whereHelperstring{field: "`tracks`.`title`"},
+	Artist:        whereHelperstring{field: "`tracks`.`artist`"},
+	Composer:      whereHelperstring{field: "`tracks`.`composer`"},
+	TrackNo:       whereHelperint{field: "`tracks`.`track_no`"},
+	Lyrics:        whereHelperstring{field: "`tracks`.`lyrics`"},
+	Comment:       whereHelperstring{field: "`tracks`.`comment`"},
+	Year:          whereHelperint{field: "`tracks`.`year`"},
+	FilePath:      whereHelperstring{field: "`tracks`.`file_path`"},
+	FilePathHash:  whereHelperstring{field: "`tracks`.`file_path_hash`"},
+	FileHash:      whereHelperstring{field: "`tracks`.`file_hash`"},
+	Format:        whereHelperstring{field: "`tracks`.`format`"},
+	FileType:      whereHelperstring{field: "`tracks`.`file_type`"},
+	AlbumArtistID: whereHelperint{field: "`tracks`.`album_artist_id`"},
+	AlbumID:       whereHelperint{field: "`tracks`.`album_id`"},
+	GenreID:       whereHelperint{field: "`tracks`.`genre_id`"},
+	CreatedAt:     whereHelpertime_Time{field: "`tracks`.`created_at`"},
+	UpdatedAt:     whereHelpertime_Time{field: "`tracks`.`updated_at`"},
 }
 
 // TrackRels is where relationship names are stored.
@@ -195,8 +195,8 @@ func (*trackR) NewStruct() *trackR {
 type trackL struct{}
 
 var (
-	trackAllColumns            = []string{"track_id", "title", "artist", "composer", "track_no", "lyrics", "comment", "year", "file_path", "file_path_md5_hash", "file_md5_hash", "format", "file_type", "album_artist_id", "album_id", "genre_id", "created_at", "updated_at"}
-	trackColumnsWithoutDefault = []string{"title", "artist", "composer", "track_no", "lyrics", "comment", "year", "file_path", "file_path_md5_hash", "file_md5_hash", "format", "file_type", "album_artist_id", "album_id", "genre_id", "created_at", "updated_at"}
+	trackAllColumns            = []string{"track_id", "title", "artist", "composer", "track_no", "lyrics", "comment", "year", "file_path", "file_path_hash", "file_hash", "format", "file_type", "album_artist_id", "album_id", "genre_id", "created_at", "updated_at"}
+	trackColumnsWithoutDefault = []string{"title", "artist", "composer", "track_no", "lyrics", "comment", "year", "file_path", "file_path_hash", "file_hash", "format", "file_type", "album_artist_id", "album_id", "genre_id", "created_at", "updated_at"}
 	trackColumnsWithDefault    = []string{"track_id"}
 	trackPrimaryKeyColumns     = []string{"track_id"}
 )
@@ -1259,7 +1259,7 @@ func (o TrackSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 
 var mySQLTrackUniqueColumns = []string{
 	"track_id",
-	"file_path_md5_hash",
+	"file_path_hash",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.

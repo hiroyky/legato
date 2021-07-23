@@ -25,6 +25,7 @@ import (
 type Genre struct {
 	GenreID   int       `boil:"genre_id" json:"genre_id" toml:"genre_id" yaml:"genre_id"`
 	Name      string    `boil:"name" json:"name" toml:"name" yaml:"name"`
+	NameHash  string    `boil:"name_hash" json:"name_hash" toml:"name_hash" yaml:"name_hash"`
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
@@ -35,11 +36,13 @@ type Genre struct {
 var GenreColumns = struct {
 	GenreID   string
 	Name      string
+	NameHash  string
 	CreatedAt string
 	UpdatedAt string
 }{
 	GenreID:   "genre_id",
 	Name:      "name",
+	NameHash:  "name_hash",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 }
@@ -47,11 +50,13 @@ var GenreColumns = struct {
 var GenreTableColumns = struct {
 	GenreID   string
 	Name      string
+	NameHash  string
 	CreatedAt string
 	UpdatedAt string
 }{
 	GenreID:   "genres.genre_id",
 	Name:      "genres.name",
+	NameHash:  "genres.name_hash",
 	CreatedAt: "genres.created_at",
 	UpdatedAt: "genres.updated_at",
 }
@@ -61,11 +66,13 @@ var GenreTableColumns = struct {
 var GenreWhere = struct {
 	GenreID   whereHelperint
 	Name      whereHelperstring
+	NameHash  whereHelperstring
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 }{
 	GenreID:   whereHelperint{field: "`genres`.`genre_id`"},
 	Name:      whereHelperstring{field: "`genres`.`name`"},
+	NameHash:  whereHelperstring{field: "`genres`.`name_hash`"},
 	CreatedAt: whereHelpertime_Time{field: "`genres`.`created_at`"},
 	UpdatedAt: whereHelpertime_Time{field: "`genres`.`updated_at`"},
 }
@@ -91,8 +98,8 @@ func (*genreR) NewStruct() *genreR {
 type genreL struct{}
 
 var (
-	genreAllColumns            = []string{"genre_id", "name", "created_at", "updated_at"}
-	genreColumnsWithoutDefault = []string{"genre_id", "name", "created_at", "updated_at"}
+	genreAllColumns            = []string{"genre_id", "name", "name_hash", "created_at", "updated_at"}
+	genreColumnsWithoutDefault = []string{"genre_id", "name", "name_hash", "created_at", "updated_at"}
 	genreColumnsWithDefault    = []string{}
 	genrePrimaryKeyColumns     = []string{"genre_id"}
 )
@@ -821,6 +828,7 @@ func (o GenreSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 
 var mySQLGenreUniqueColumns = []string{
 	"genre_id",
+	"name_hash",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
