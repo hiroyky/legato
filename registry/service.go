@@ -10,5 +10,5 @@ func NewMetadataService(_ context.Context) service.MetadataService {
 }
 
 func NewLibraryService(_ context.Context) service.LibraryService {
-	return service.NewLibraryService()
+	return service.NewLibraryService(NewTxnInsertTrack())
 }

@@ -16,6 +16,7 @@ services:
     volumes:
       - ./go.mod:/go/src/gihtub.com/hiroyky/legato/go.mod
       - ./go.sum:/go/src/gihtub.com/hiroyky/legato/go.sum
+      -  /mnt/f/users/hirokazu/Music/:/mnt/music
     depends_on:
       - mysql
   mysql:

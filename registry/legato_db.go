@@ -3,6 +3,7 @@ package registry
 import (
 	"database/sql"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/legato/infrastructure/config"
 )
 
@@ -10,7 +11,7 @@ var LegatoDB *sql.DB = nil
 
 func init() {
 	source := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?parseTime=true",
+		"%s:%s@tcp(%s:%d)/%s?parseTime=true",
 		config.Env.MySQLUserName,
 		config.Env.MySQLPassword,
 		config.Env.MySQLHostName,

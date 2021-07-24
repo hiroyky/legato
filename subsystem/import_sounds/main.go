@@ -24,9 +24,13 @@ func main() {
 
 	fmt.Printf("Search music files from %s \n", *baseDir)
 	fmt.Printf("Extensions of target files are %#v", extensions)
+
+	if err := insert(context.Background(), *baseDir, extensions); err != nil {
+		panic(err)
+	}
 }
 
-func insert(baseDir string, extensions []string) error {
+func insert(ctx context.Context, baseDir string, extensions []string) error {
 	fmt.Printf("Searching at %s", baseDir)
 	contents, err := ioutil.ReadDir(baseDir)
 	if err != nil {
@@ -36,7 +40,7 @@ func insert(baseDir string, extensions []string) error {
 	for _, c := range contents {
 		p := filepath.Join(baseDir, c.Name())
 		if c.IsDir() {
-			if err := insert(p, extensions); err != nil {
+			if err := insert(ctx, p, extensions); err != nil {
 				return err
 			}
 			continue
@@ -55,7 +59,7 @@ func insert(baseDir string, extensions []string) error {
 			return errors.Wrap(err, fmt.Sprintf("Fatal to parse md5 hash %s", p))
 		}
 
-		if err := libraryService.InsertTrack(meta, md5Hash, p); err != nil {
+		if err := libraryService.InsertTrack(ctx, meta, md5Hash, p); err != nil {
 			return errors.Wrap(err, fmt.Sprintf("Fatal to insert track %s", p))
 		}
 	}

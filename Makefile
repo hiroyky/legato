@@ -13,8 +13,13 @@ gen_gql:
 gen_sqlboil:
 	go run github.com/volatiletech/sqlboiler/v4 mysql
 
-build:
+build: _build_app _build_import_sounds
+
+_build_app:
 	go build -o ./dist/app
+
+_build_import_sounds:
+	go build -o ./dist/import_sounds ./subsystem/import_sounds
 
 fmt:
 	go fmt ./...
