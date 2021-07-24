@@ -63,6 +63,73 @@ var AlbumArtistTableColumns = struct {
 
 // Generated where
 
+type whereHelperint struct{ field string }
+
+func (w whereHelperint) EQ(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint) NEQ(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint) LT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint) LTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint) GT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint) GTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperint) IN(slice []int) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperint) NIN(slice []int) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
+type whereHelperstring struct{ field string }
+
+func (w whereHelperstring) EQ(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperstring) NEQ(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperstring) LT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperstring) LTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperstring) GT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperstring) GTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperstring) IN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
+type whereHelpertime_Time struct{ field string }
+
+func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var AlbumArtistWhere = struct {
 	AlbumArtistID whereHelperint
 	Name          whereHelperstring
@@ -390,14 +457,14 @@ func (o *AlbumArtist) Albums(mods ...qm.QueryMod) albumQuery {
 	}
 
 	queryMods = append(queryMods,
-		qm.Where("`album`.`album_artist_id`=?", o.AlbumArtistID),
+		qm.Where("`albums`.`album_artist_id`=?", o.AlbumArtistID),
 	)
 
 	query := Albums(queryMods...)
-	queries.SetFrom(query.Query, "`album`")
+	queries.SetFrom(query.Query, "`albums`")
 
 	if len(queries.GetSelect(query.Query)) == 0 {
-		queries.SetSelect(query.Query, []string{"`album`.*"})
+		queries.SetSelect(query.Query, []string{"`albums`.*"})
 	}
 
 	return query
@@ -464,8 +531,8 @@ func (albumArtistL) LoadAlbums(ctx context.Context, e boil.ContextExecutor, sing
 	}
 
 	query := NewQuery(
-		qm.From(`album`),
-		qm.WhereIn(`album.album_artist_id in ?`, args...),
+		qm.From(`albums`),
+		qm.WhereIn(`albums.album_artist_id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -473,19 +540,19 @@ func (albumArtistL) LoadAlbums(ctx context.Context, e boil.ContextExecutor, sing
 
 	results, err := query.QueryContext(ctx, e)
 	if err != nil {
-		return errors.Wrap(err, "failed to eager load album")
+		return errors.Wrap(err, "failed to eager load albums")
 	}
 
 	var resultSlice []*Album
 	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice album")
+		return errors.Wrap(err, "failed to bind eager loaded slice albums")
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on album")
+		return errors.Wrap(err, "failed to close results in eager load on albums")
 	}
 	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for album")
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for albums")
 	}
 
 	if len(albumAfterSelectHooks) != 0 {
@@ -634,7 +701,7 @@ func (o *AlbumArtist) AddAlbums(ctx context.Context, exec boil.ContextExecutor, 
 			}
 		} else {
 			updateQuery := fmt.Sprintf(
-				"UPDATE `album` SET %s WHERE %s",
+				"UPDATE `albums` SET %s WHERE %s",
 				strmangle.SetParamNames("`", "`", 0, []string{"album_artist_id"}),
 				strmangle.WhereClause("`", "`", 0, albumPrimaryKeyColumns),
 			)

@@ -62,83 +62,16 @@ var AlbumTableColumns = struct {
 	CreatedAt     string
 	UpdatedAt     string
 }{
-	AlbumID:       "album.album_id",
-	Name:          "album.name",
-	AlbumArtistID: "album.album_artist_id",
-	DiscNo:        "album.disc_no",
-	DiscTotal:     "album.disc_total",
-	CreatedAt:     "album.created_at",
-	UpdatedAt:     "album.updated_at",
+	AlbumID:       "albums.album_id",
+	Name:          "albums.name",
+	AlbumArtistID: "albums.album_artist_id",
+	DiscNo:        "albums.disc_no",
+	DiscTotal:     "albums.disc_total",
+	CreatedAt:     "albums.created_at",
+	UpdatedAt:     "albums.updated_at",
 }
 
 // Generated where
-
-type whereHelperint struct{ field string }
-
-func (w whereHelperint) EQ(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperint) NEQ(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperint) LT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperint) LTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperint) GT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperint) GTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-func (w whereHelperint) IN(slice []int) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelperint) NIN(slice []int) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
-type whereHelperstring struct{ field string }
-
-func (w whereHelperstring) EQ(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperstring) NEQ(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperstring) LT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperstring) LTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperstring) GT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperstring) GTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-func (w whereHelperstring) IN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
-type whereHelpertime_Time struct{ field string }
-
-func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.EQ, x)
-}
-func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.NEQ, x)
-}
-func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
 
 var AlbumWhere = struct {
 	AlbumID       whereHelperint
@@ -149,13 +82,13 @@ var AlbumWhere = struct {
 	CreatedAt     whereHelpertime_Time
 	UpdatedAt     whereHelpertime_Time
 }{
-	AlbumID:       whereHelperint{field: "`album`.`album_id`"},
-	Name:          whereHelperstring{field: "`album`.`name`"},
-	AlbumArtistID: whereHelperint{field: "`album`.`album_artist_id`"},
-	DiscNo:        whereHelperint{field: "`album`.`disc_no`"},
-	DiscTotal:     whereHelperint{field: "`album`.`disc_total`"},
-	CreatedAt:     whereHelpertime_Time{field: "`album`.`created_at`"},
-	UpdatedAt:     whereHelpertime_Time{field: "`album`.`updated_at`"},
+	AlbumID:       whereHelperint{field: "`albums`.`album_id`"},
+	Name:          whereHelperstring{field: "`albums`.`name`"},
+	AlbumArtistID: whereHelperint{field: "`albums`.`album_artist_id`"},
+	DiscNo:        whereHelperint{field: "`albums`.`disc_no`"},
+	DiscTotal:     whereHelperint{field: "`albums`.`disc_total`"},
+	CreatedAt:     whereHelpertime_Time{field: "`albums`.`created_at`"},
+	UpdatedAt:     whereHelpertime_Time{field: "`albums`.`updated_at`"},
 }
 
 // AlbumRels is where relationship names are stored.
@@ -402,7 +335,7 @@ func (q albumQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Album,
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "dbmodel: failed to execute a one query for album")
+		return nil, errors.Wrap(err, "dbmodel: failed to execute a one query for albums")
 	}
 
 	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
@@ -441,7 +374,7 @@ func (q albumQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return 0, errors.Wrap(err, "dbmodel: failed to count album rows")
+		return 0, errors.Wrap(err, "dbmodel: failed to count albums rows")
 	}
 
 	return count, nil
@@ -457,7 +390,7 @@ func (q albumQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return false, errors.Wrap(err, "dbmodel: failed to check if album exists")
+		return false, errors.Wrap(err, "dbmodel: failed to check if albums exists")
 	}
 
 	return count > 0, nil
@@ -712,7 +645,7 @@ func (o *Album) SetAlbumArtist(ctx context.Context, exec boil.ContextExecutor, i
 	}
 
 	updateQuery := fmt.Sprintf(
-		"UPDATE `album` SET %s WHERE %s",
+		"UPDATE `albums` SET %s WHERE %s",
 		strmangle.SetParamNames("`", "`", 0, []string{"album_artist_id"}),
 		strmangle.WhereClause("`", "`", 0, albumPrimaryKeyColumns),
 	)
@@ -802,7 +735,7 @@ func (o *Album) AddTracks(ctx context.Context, exec boil.ContextExecutor, insert
 
 // Albums retrieves all the records using an executor.
 func Albums(mods ...qm.QueryMod) albumQuery {
-	mods = append(mods, qm.From("`album`"))
+	mods = append(mods, qm.From("`albums`"))
 	return albumQuery{NewQuery(mods...)}
 }
 
@@ -816,7 +749,7 @@ func FindAlbum(ctx context.Context, exec boil.ContextExecutor, albumID int, sele
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from `album` where `album_id`=?", sel,
+		"select %s from `albums` where `album_id`=?", sel,
 	)
 
 	q := queries.Raw(query, albumID)
@@ -826,7 +759,7 @@ func FindAlbum(ctx context.Context, exec boil.ContextExecutor, albumID int, sele
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "dbmodel: unable to select from album")
+		return nil, errors.Wrap(err, "dbmodel: unable to select from albums")
 	}
 
 	if err = albumObj.doAfterSelectHooks(ctx, exec); err != nil {
@@ -840,7 +773,7 @@ func FindAlbum(ctx context.Context, exec boil.ContextExecutor, albumID int, sele
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
 func (o *Album) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
-		return errors.New("dbmodel: no album provided for insertion")
+		return errors.New("dbmodel: no albums provided for insertion")
 	}
 
 	var err error
@@ -883,15 +816,15 @@ func (o *Album) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO `album` (`%s`) %%sVALUES (%s)%%s", strings.Join(wl, "`,`"), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO `albums` (`%s`) %%sVALUES (%s)%%s", strings.Join(wl, "`,`"), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO `album` () VALUES ()%s%s"
+			cache.query = "INSERT INTO `albums` () VALUES ()%s%s"
 		}
 
 		var queryOutput, queryReturning string
 
 		if len(cache.retMapping) != 0 {
-			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `album` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, albumPrimaryKeyColumns))
+			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `albums` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, albumPrimaryKeyColumns))
 		}
 
 		cache.query = fmt.Sprintf(cache.query, queryOutput, queryReturning)
@@ -908,7 +841,7 @@ func (o *Album) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
-		return errors.Wrap(err, "dbmodel: unable to insert into album")
+		return errors.Wrap(err, "dbmodel: unable to insert into albums")
 	}
 
 	var lastID int64
@@ -939,7 +872,7 @@ func (o *Album) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 	}
 	err = exec.QueryRowContext(ctx, cache.retQuery, identifierCols...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
 	if err != nil {
-		return errors.Wrap(err, "dbmodel: unable to populate default values for album")
+		return errors.Wrap(err, "dbmodel: unable to populate default values for albums")
 	}
 
 CacheNoHooks:
@@ -981,10 +914,10 @@ func (o *Album) Update(ctx context.Context, exec boil.ContextExecutor, columns b
 			wl = strmangle.SetComplement(wl, []string{"created_at"})
 		}
 		if len(wl) == 0 {
-			return 0, errors.New("dbmodel: unable to update album, could not build whitelist")
+			return 0, errors.New("dbmodel: unable to update albums, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE `album` SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE `albums` SET %s WHERE %s",
 			strmangle.SetParamNames("`", "`", 0, wl),
 			strmangle.WhereClause("`", "`", 0, albumPrimaryKeyColumns),
 		)
@@ -1004,12 +937,12 @@ func (o *Album) Update(ctx context.Context, exec boil.ContextExecutor, columns b
 	var result sql.Result
 	result, err = exec.ExecContext(ctx, cache.query, values...)
 	if err != nil {
-		return 0, errors.Wrap(err, "dbmodel: unable to update album row")
+		return 0, errors.Wrap(err, "dbmodel: unable to update albums row")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "dbmodel: failed to get rows affected by update for album")
+		return 0, errors.Wrap(err, "dbmodel: failed to get rows affected by update for albums")
 	}
 
 	if !cached {
@@ -1027,12 +960,12 @@ func (q albumQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "dbmodel: unable to update all for album")
+		return 0, errors.Wrap(err, "dbmodel: unable to update all for albums")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "dbmodel: unable to retrieve rows affected for album")
+		return 0, errors.Wrap(err, "dbmodel: unable to retrieve rows affected for albums")
 	}
 
 	return rowsAff, nil
@@ -1065,7 +998,7 @@ func (o AlbumSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE `album` SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE `albums` SET %s WHERE %s",
 		strmangle.SetParamNames("`", "`", 0, colNames),
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, albumPrimaryKeyColumns, len(o)))
 
@@ -1094,7 +1027,7 @@ var mySQLAlbumUniqueColumns = []string{
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
 func (o *Album) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
-		return errors.New("dbmodel: no album provided for upsert")
+		return errors.New("dbmodel: no albums provided for upsert")
 	}
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
@@ -1157,13 +1090,13 @@ func (o *Album) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCol
 		)
 
 		if !updateColumns.IsNone() && len(update) == 0 {
-			return errors.New("dbmodel: unable to upsert album, could not build update column list")
+			return errors.New("dbmodel: unable to upsert albums, could not build update column list")
 		}
 
 		ret = strmangle.SetComplement(ret, nzUniques)
-		cache.query = buildUpsertQueryMySQL(dialect, "`album`", update, insert)
+		cache.query = buildUpsertQueryMySQL(dialect, "`albums`", update, insert)
 		cache.retQuery = fmt.Sprintf(
-			"SELECT %s FROM `album` WHERE %s",
+			"SELECT %s FROM `albums` WHERE %s",
 			strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, ret), ","),
 			strmangle.WhereClause("`", "`", 0, nzUniques),
 		)
@@ -1195,7 +1128,7 @@ func (o *Album) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCol
 	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
-		return errors.Wrap(err, "dbmodel: unable to upsert for album")
+		return errors.Wrap(err, "dbmodel: unable to upsert for albums")
 	}
 
 	var lastID int64
@@ -1218,7 +1151,7 @@ func (o *Album) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCol
 
 	uniqueMap, err = queries.BindMapping(albumType, albumMapping, nzUniques)
 	if err != nil {
-		return errors.Wrap(err, "dbmodel: unable to retrieve unique values for album")
+		return errors.Wrap(err, "dbmodel: unable to retrieve unique values for albums")
 	}
 	nzUniqueCols = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), uniqueMap)
 
@@ -1229,7 +1162,7 @@ func (o *Album) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCol
 	}
 	err = exec.QueryRowContext(ctx, cache.retQuery, nzUniqueCols...).Scan(returns...)
 	if err != nil {
-		return errors.Wrap(err, "dbmodel: unable to populate default values for album")
+		return errors.Wrap(err, "dbmodel: unable to populate default values for albums")
 	}
 
 CacheNoHooks:
@@ -1254,7 +1187,7 @@ func (o *Album) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, e
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), albumPrimaryKeyMapping)
-	sql := "DELETE FROM `album` WHERE `album_id`=?"
+	sql := "DELETE FROM `albums` WHERE `album_id`=?"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1263,12 +1196,12 @@ func (o *Album) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, e
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "dbmodel: unable to delete from album")
+		return 0, errors.Wrap(err, "dbmodel: unable to delete from albums")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "dbmodel: failed to get rows affected by delete for album")
+		return 0, errors.Wrap(err, "dbmodel: failed to get rows affected by delete for albums")
 	}
 
 	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
@@ -1288,12 +1221,12 @@ func (q albumQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "dbmodel: unable to delete all from album")
+		return 0, errors.Wrap(err, "dbmodel: unable to delete all from albums")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "dbmodel: failed to get rows affected by deleteall for album")
+		return 0, errors.Wrap(err, "dbmodel: failed to get rows affected by deleteall for albums")
 	}
 
 	return rowsAff, nil
@@ -1319,7 +1252,7 @@ func (o AlbumSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM `album` WHERE " +
+	sql := "DELETE FROM `albums` WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, albumPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
@@ -1334,7 +1267,7 @@ func (o AlbumSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "dbmodel: failed to get rows affected by deleteall for album")
+		return 0, errors.Wrap(err, "dbmodel: failed to get rows affected by deleteall for albums")
 	}
 
 	if len(albumAfterDeleteHooks) != 0 {
@@ -1374,7 +1307,7 @@ func (o *AlbumSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) e
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT `album`.* FROM `album` WHERE " +
+	sql := "SELECT `albums`.* FROM `albums` WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, albumPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
@@ -1392,7 +1325,7 @@ func (o *AlbumSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) e
 // AlbumExists checks if the Album row exists.
 func AlbumExists(ctx context.Context, exec boil.ContextExecutor, albumID int) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from `album` where `album_id`=? limit 1)"
+	sql := "select exists(select 1 from `albums` where `album_id`=? limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1403,7 +1336,7 @@ func AlbumExists(ctx context.Context, exec boil.ContextExecutor, albumID int) (b
 
 	err := row.Scan(&exists)
 	if err != nil {
-		return false, errors.Wrap(err, "dbmodel: unable to check if album exists")
+		return false, errors.Wrap(err, "dbmodel: unable to check if albums exists")
 	}
 
 	return exists, nil

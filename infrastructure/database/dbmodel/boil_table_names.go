@@ -4,13 +4,13 @@
 package dbmodel
 
 var TableNames = struct {
-	Album        string
 	AlbumArtists string
+	Albums       string
 	Genres       string
 	Tracks       string
 }{
-	Album:        "album",
 	AlbumArtists: "album_artists",
+	Albums:       "albums",
 	Genres:       "genres",
 	Tracks:       "tracks",
 }

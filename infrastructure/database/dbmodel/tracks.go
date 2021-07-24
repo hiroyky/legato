@@ -499,7 +499,7 @@ func (o *Track) Album(mods ...qm.QueryMod) albumQuery {
 	queryMods = append(queryMods, mods...)
 
 	query := Albums(queryMods...)
-	queries.SetFrom(query.Query, "`album`")
+	queries.SetFrom(query.Query, "`albums`")
 
 	return query
 }
@@ -664,8 +664,8 @@ func (trackL) LoadAlbum(ctx context.Context, e boil.ContextExecutor, singular bo
 	}
 
 	query := NewQuery(
-		qm.From(`album`),
-		qm.WhereIn(`album.album_id in ?`, args...),
+		qm.From(`albums`),
+		qm.WhereIn(`albums.album_id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -682,10 +682,10 @@ func (trackL) LoadAlbum(ctx context.Context, e boil.ContextExecutor, singular bo
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for album")
+		return errors.Wrap(err, "failed to close results of eager load for albums")
 	}
 	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for album")
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for albums")
 	}
 
 	if len(trackAfterSelectHooks) != 0 {
