@@ -169,8 +169,8 @@ type albumArtistL struct{}
 
 var (
 	albumArtistAllColumns            = []string{"album_artist_id", "name", "name_hash", "created_at", "updated_at"}
-	albumArtistColumnsWithoutDefault = []string{"album_artist_id", "name", "name_hash", "created_at", "updated_at"}
-	albumArtistColumnsWithDefault    = []string{}
+	albumArtistColumnsWithoutDefault = []string{"name", "name_hash", "created_at", "updated_at"}
+	albumArtistColumnsWithDefault    = []string{"album_artist_id"}
 	albumArtistPrimaryKeyColumns     = []string{"album_artist_id"}
 )
 
@@ -898,15 +898,26 @@ func (o *AlbumArtist) Insert(ctx context.Context, exec boil.ContextExecutor, col
 		fmt.Fprintln(writer, cache.query)
 		fmt.Fprintln(writer, vals)
 	}
-	_, err = exec.ExecContext(ctx, cache.query, vals...)
+	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
 		return errors.Wrap(err, "dbmodel: unable to insert into album_artists")
 	}
 
+	var lastID int64
 	var identifierCols []interface{}
 
 	if len(cache.retMapping) == 0 {
+		goto CacheNoHooks
+	}
+
+	lastID, err = result.LastInsertId()
+	if err != nil {
+		return ErrSyncFail
+	}
+
+	o.AlbumArtistID = int(lastID)
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == albumArtistMapping["album_artist_id"] {
 		goto CacheNoHooks
 	}
 
@@ -1175,16 +1186,27 @@ func (o *AlbumArtist) Upsert(ctx context.Context, exec boil.ContextExecutor, upd
 		fmt.Fprintln(writer, cache.query)
 		fmt.Fprintln(writer, vals)
 	}
-	_, err = exec.ExecContext(ctx, cache.query, vals...)
+	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
 		return errors.Wrap(err, "dbmodel: unable to upsert for album_artists")
 	}
 
+	var lastID int64
 	var uniqueMap []uint64
 	var nzUniqueCols []interface{}
 
 	if len(cache.retMapping) == 0 {
+		goto CacheNoHooks
+	}
+
+	lastID, err = result.LastInsertId()
+	if err != nil {
+		return ErrSyncFail
+	}
+
+	o.AlbumArtistID = int(lastID)
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == albumArtistMapping["album_artist_id"] {
 		goto CacheNoHooks
 	}
 

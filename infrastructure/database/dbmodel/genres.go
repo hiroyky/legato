@@ -99,8 +99,8 @@ type genreL struct{}
 
 var (
 	genreAllColumns            = []string{"genre_id", "name", "name_hash", "created_at", "updated_at"}
-	genreColumnsWithoutDefault = []string{"genre_id", "name", "name_hash", "created_at", "updated_at"}
-	genreColumnsWithDefault    = []string{}
+	genreColumnsWithoutDefault = []string{"name", "name_hash", "created_at", "updated_at"}
+	genreColumnsWithDefault    = []string{"genre_id"}
 	genrePrimaryKeyColumns     = []string{"genre_id"}
 )
 
@@ -656,15 +656,26 @@ func (o *Genre) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 		fmt.Fprintln(writer, cache.query)
 		fmt.Fprintln(writer, vals)
 	}
-	_, err = exec.ExecContext(ctx, cache.query, vals...)
+	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
 		return errors.Wrap(err, "dbmodel: unable to insert into genres")
 	}
 
+	var lastID int64
 	var identifierCols []interface{}
 
 	if len(cache.retMapping) == 0 {
+		goto CacheNoHooks
+	}
+
+	lastID, err = result.LastInsertId()
+	if err != nil {
+		return ErrSyncFail
+	}
+
+	o.GenreID = int(lastID)
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == genreMapping["genre_id"] {
 		goto CacheNoHooks
 	}
 
@@ -933,16 +944,27 @@ func (o *Genre) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCol
 		fmt.Fprintln(writer, cache.query)
 		fmt.Fprintln(writer, vals)
 	}
-	_, err = exec.ExecContext(ctx, cache.query, vals...)
+	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
 		return errors.Wrap(err, "dbmodel: unable to upsert for genres")
 	}
 
+	var lastID int64
 	var uniqueMap []uint64
 	var nzUniqueCols []interface{}
 
 	if len(cache.retMapping) == 0 {
+		goto CacheNoHooks
+	}
+
+	lastID, err = result.LastInsertId()
+	if err != nil {
+		return ErrSyncFail
+	}
+
+	o.GenreID = int(lastID)
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == genreMapping["genre_id"] {
 		goto CacheNoHooks
 	}
 
