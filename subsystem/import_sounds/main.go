@@ -60,8 +60,14 @@ func insert(ctx context.Context, baseDir string, extensions []string) error {
 			return errors.Wrap(err, fmt.Sprintf("Fatal to parse md5 hash %s", p))
 		}
 
-		if err := libraryService.InsertTrack(ctx, meta, md5Hash, p); err != nil {
-			return errors.Wrap(err, fmt.Sprintf("Fatal to insert track %s", p))
+		if meta == nil {
+			if err := libraryService.InsertTrackWithoutMetadata(ctx, md5Hash, p); err != nil {
+				return errors.Wrap(err, fmt.Sprintf("Fatal to insert track %s", p))
+			}
+		} else {
+			if err := libraryService.InsertTrack(ctx, meta, md5Hash, p); err != nil {
+				return errors.Wrap(err, fmt.Sprintf("Fatal to insert track %s", p))
+			}
 		}
 	}
 	return nil

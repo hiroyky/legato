@@ -7,10 +7,13 @@ import (
 	"github.com/legato/infrastructure/database/dbmodel"
 	"github.com/legato/infrastructure/database/repository"
 	"github.com/legato/infrastructure/database/repository/dto"
+	"path/filepath"
+	"strings"
 )
 
 type LibraryService interface {
 	InsertTrack(ctx context.Context, metadata tag.Metadata, fileHash, filePath string) error
+	InsertTrackWithoutMetadata(ctx context.Context, fileHash, filePath string) error
 }
 
 func NewLibraryService(txnInsertTrack repository.TxnInsertTrack) LibraryService {
@@ -57,6 +60,28 @@ func (s *libraryService) InsertTrack(ctx context.Context, metadata tag.Metadata,
 		Album:       album,
 		AlbumArtist: albumArtist,
 		Genre:       genre,
+	})
+}
+
+func (s *libraryService) InsertTrackWithoutMetadata(ctx context.Context, fileHash, filePath string) error {
+	fileName := strings.TrimSuffix(filepath.Base(filePath), filepath.Ext(filePath))
+	return s.txnInsertTrack.Commit(ctx, &dto.TxnInsertTrackDTO{
+		Track: &dbmodel.Track{
+			Title:    fileName,
+			FilePath: filePath,
+			FileHash: fileHash,
+		},
+		Album: &dbmodel.Album{
+			Name:      "unknown",
+			DiscNo:    0,
+			DiscTotal: 0,
+		},
+		AlbumArtist: &dbmodel.AlbumArtist{
+			Name: "unknown",
+		},
+		Genre: &dbmodel.Genre{
+			Name: "unknown",
+		},
 	})
 }
 

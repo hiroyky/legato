@@ -32,7 +32,7 @@ func (t *txnInsertTrack) Commit(ctx context.Context, o *dto.TxnInsertTrackDTO) e
 		if err := tx.Rollback(); err != nil {
 			return errors.Wrap(err, "Failed to rollback")
 		}
-		return errors.Wrap(err, "Rollback: " + o.Track.FilePath)
+		return errors.Wrap(err, "Rollback: "+o.Track.FilePath)
 	}
 
 	return tx.Commit()
@@ -54,7 +54,7 @@ func (t *txnInsertTrack) transaction(ctx context.Context, tx *sql.Tx, o *dto.Txn
 			return err
 		}
 	}
-
+	o.Track.GenreID = o.Genre.GenreID
 	o.AlbumArtist.NameHash = genHash(o.AlbumArtist.Name)
 	existAlbumArtist, err := dbmodel.AlbumArtists(qm.Where("name_hash=?", o.AlbumArtist.NameHash)).One(ctx, tx)
 	if err == sql.ErrNoRows {
@@ -70,9 +70,8 @@ func (t *txnInsertTrack) transaction(ctx context.Context, tx *sql.Tx, o *dto.Txn
 			return err
 		}
 	}
-
+	o.Track.AlbumArtistID = o.AlbumArtist.AlbumArtistID
 	o.Album.AlbumArtistID = o.AlbumArtist.AlbumArtistID
-
 	existAlbum, err := dbmodel.Albums(
 		qm.Where("name=?", o.Album.Name),
 		qm.Where("disc_no=?", o.Album.DiscNo),
@@ -91,10 +90,8 @@ func (t *txnInsertTrack) transaction(ctx context.Context, tx *sql.Tx, o *dto.Txn
 			return err
 		}
 	}
-
-	o.Track.GenreID = o.Genre.GenreID
 	o.Track.AlbumID = o.Album.AlbumID
-	o.Track.AlbumArtistID = o.AlbumArtist.AlbumArtistID
+
 	o.Track.FilePathHash = genHash(o.Track.FilePath)
 	existTrack, err := dbmodel.Tracks(qm.Where("file_path_hash=?", o.Track.FilePathHash)).One(ctx, tx)
 	if err == sql.ErrNoRows {
