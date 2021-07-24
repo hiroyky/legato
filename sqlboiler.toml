@@ -1,5 +1,5 @@
-pkgname = "model"
-output = "database/generated/model"
+pkgname = "dbmodel"
+output = "infrastructure/database/dbmodel"
 
 wipe     = true
 no-tests = true
