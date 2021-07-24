@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"github.com/friendsofgo/errors"
 	"github.com/legato/infrastructure/database/dbmodel"
 	"github.com/legato/infrastructure/database/repository/dto"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -28,7 +29,10 @@ func (t *txnInsertTrack) Commit(ctx context.Context, o *dto.TxnInsertTrackDTO) e
 	}
 
 	if err := t.transaction(ctx, tx, o); err != nil {
-		return tx.Rollback()
+		if err := tx.Rollback(); err != nil {
+			return errors.Wrap(err, "Failed to rollback")
+		}
+		return errors.Wrap(err, "Rollback: " + o.Track.FilePath)
 	}
 
 	return tx.Commit()
@@ -37,7 +41,7 @@ func (t *txnInsertTrack) Commit(ctx context.Context, o *dto.TxnInsertTrackDTO) e
 func (t *txnInsertTrack) transaction(ctx context.Context, tx *sql.Tx, o *dto.TxnInsertTrackDTO) error {
 	o.Genre.NameHash = genHash(o.Genre.Name)
 	existGenre, err := dbmodel.Genres(qm.Where("name_hash=?", o.Genre.NameHash)).One(ctx, tx)
-	if err != sql.ErrNoRows {
+	if err == sql.ErrNoRows {
 		if err := o.Genre.Insert(ctx, tx, boil.Infer()); err != nil {
 			return err
 		}
@@ -71,8 +75,8 @@ func (t *txnInsertTrack) transaction(ctx context.Context, tx *sql.Tx, o *dto.Txn
 
 	existAlbum, err := dbmodel.Albums(
 		qm.Where("name=?", o.Album.Name),
-		qm.Where("disc_no", o.Album.DiscNo),
-		qm.WhereIn("disc_total", o.Album.DiscTotal),
+		qm.Where("disc_no=?", o.Album.DiscNo),
+		qm.WhereIn("disc_total=?", o.Album.DiscTotal),
 	).One(ctx, tx)
 	if err == sql.ErrNoRows {
 		if err := o.Album.Insert(ctx, tx, boil.Infer()); err != nil {

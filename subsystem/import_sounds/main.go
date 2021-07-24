@@ -31,7 +31,7 @@ func main() {
 }
 
 func insert(ctx context.Context, baseDir string, extensions []string) error {
-	fmt.Printf("Searching at %s", baseDir)
+	fmt.Printf("Searching at %s \n", baseDir)
 	contents, err := ioutil.ReadDir(baseDir)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("Fatal to readDir at %s", baseDir))
@@ -50,6 +50,7 @@ func insert(ctx context.Context, baseDir string, extensions []string) error {
 			continue
 		}
 
+		fmt.Printf("Import %s \n", p)
 		meta, err := metadataService.ParseMetadata(p)
 		if err != nil {
 			return errors.Wrap(err, fmt.Sprintf("Fatal to parse metadata %s", p))
