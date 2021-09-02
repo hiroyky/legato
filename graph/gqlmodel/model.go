@@ -38,3 +38,10 @@ type AlbumArtist struct {
 }
 
 func (AlbumArtist) IsNode() {}
+
+type Genre struct {
+	ID              string           `json:"id"`
+	Name            string           `json:"name"`
+}
+
+func (Genre) IsNode() {}

@@ -48,15 +48,6 @@ type AlbumPagination struct {
 
 func (AlbumPagination) IsPagination() {}
 
-type Genre struct {
-	ID              string           `json:"id"`
-	Name            string           `json:"name"`
-	Tracks          []*Track         `json:"tracks"`
-	TrackPagination *TrackPagination `json:"trackPagination"`
-}
-
-func (Genre) IsNode() {}
-
 type GenreEdge struct {
 	Cursor string `json:"cursor"`
 	Node   *Genre `json:"node"`

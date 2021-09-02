@@ -5,8 +5,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/legato/graph/generated"
 	"github.com/legato/graph/gqlmodel"
 	"github.com/legato/lib/gql"
@@ -26,11 +24,27 @@ func (r *trackResolver) Album(ctx context.Context, obj *gqlmodel.Track) (*gqlmod
 }
 
 func (r *trackResolver) Genre(ctx context.Context, obj *gqlmodel.Track) (*gqlmodel.Genre, error) {
-	panic(fmt.Errorf("not implemented"))
+	decodedID, err := gql.DecodeID(obj.GenreID)
+	if err != nil {
+		return nil, err
+	}
+	genre, err := r.GenreRepository.GetByID(ctx, decodedID)
+	if err != nil {
+		return nil, err
+	}
+	return gqlmodel.NewGenre(genre), nil
 }
 
 func (r *trackResolver) AlbumArtist(ctx context.Context, obj *gqlmodel.Track) (*gqlmodel.AlbumArtist, error) {
-	panic(fmt.Errorf("not implemented"))
+	decodedID, err := gql.DecodeID(obj.AlbumArtistID)
+	if err != nil {
+		return nil, err
+	}
+	albumArtist, err := r.AlbumArtistRepository.GetByID(ctx, decodedID)
+	if err != nil {
+		return nil, err
+	}
+	return gqlmodel.NewAlbumArtist(albumArtist), nil
 }
 
 // Track returns generated.TrackResolver implementation.

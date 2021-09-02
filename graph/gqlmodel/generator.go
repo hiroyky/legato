@@ -40,3 +40,10 @@ func NewAlbumArtist(albumArtist *dbmodel.AlbumArtist) *AlbumArtist {
 		Name: albumArtist.Name,
 	}
 }
+
+func NewGenre(genre *dbmodel.Genre) *Genre {
+	return &Genre{
+		ID:              gql.EncodeID(GenreName, genre.GenreID),
+		Name:            genre.Name,
+	}
+}

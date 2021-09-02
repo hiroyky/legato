@@ -38,6 +38,7 @@ type Config struct {
 type ResolverRoot interface {
 	Album() AlbumResolver
 	AlbumArtist() AlbumArtistResolver
+	Genre() GenreResolver
 	Query() QueryResolver
 	Track() TrackResolver
 }
@@ -169,6 +170,10 @@ type AlbumArtistResolver interface {
 	AlbumPagination(ctx context.Context, obj *gqlmodel.AlbumArtist) (*gqlmodel.AlbumArtistPagination, error)
 	Tracks(ctx context.Context, obj *gqlmodel.AlbumArtist) ([]*gqlmodel.Track, error)
 	TrackPagination(ctx context.Context, obj *gqlmodel.AlbumArtist) (*gqlmodel.TrackPagination, error)
+}
+type GenreResolver interface {
+	Tracks(ctx context.Context, obj *gqlmodel.Genre) ([]*gqlmodel.Track, error)
+	TrackPagination(ctx context.Context, obj *gqlmodel.Genre) (*gqlmodel.TrackPagination, error)
 }
 type QueryResolver interface {
 	Track(ctx context.Context, id string) (*gqlmodel.Track, error)
@@ -1974,14 +1979,14 @@ func (ec *executionContext) _Genre_tracks(ctx context.Context, field graphql.Col
 		Object:     "Genre",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Tracks, nil
+		return ec.resolvers.Genre().Tracks(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2006,14 +2011,14 @@ func (ec *executionContext) _Genre_trackPagination(ctx context.Context, field gr
 		Object:     "Genre",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.TrackPagination, nil
+		return ec.resolvers.Genre().TrackPagination(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5125,20 +5130,38 @@ func (ec *executionContext) _Genre(ctx context.Context, sel ast.SelectionSet, ob
 		case "id":
 			out.Values[i] = ec._Genre_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
 			out.Values[i] = ec._Genre_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "tracks":
-			out.Values[i] = ec._Genre_tracks(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Genre_tracks(ctx, field, obj)
+				return res
+			})
 		case "trackPagination":
-			out.Values[i] = ec._Genre_trackPagination(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Genre_trackPagination(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
