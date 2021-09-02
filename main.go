@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	if err := router.Router.Run(fmt.Sprintf(":%d", config.Env.Port)); err != nil {
+	if err := router.Router.Run(fmt.Sprintf(":%d", config.Env.APIPort)); err != nil {
 		panic(err)
 	}
 }

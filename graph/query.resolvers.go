@@ -9,10 +9,21 @@ import (
 
 	"github.com/legato/graph/generated"
 	"github.com/legato/graph/gqlmodel"
+	"github.com/legato/lib/gql"
 )
 
 func (r *queryResolver) Track(ctx context.Context, id string) (*gqlmodel.Track, error) {
-	panic(fmt.Errorf("not implemented"))
+	decodedID, err := gql.DecodeID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	track, err := r.TrackRepository.GetByID(ctx, decodedID)
+	if err != nil {
+		return nil, err
+	}
+
+	return gqlmodel.NewTrack(track), nil
 }
 
 func (r *queryResolver) Tracks(ctx context.Context, limit int, offset *int) (*gqlmodel.TrackPagination, error) {

@@ -12,6 +12,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/ktnyt/go-moji v1.0.0
 	github.com/pkg/errors v0.8.1
+	github.com/stretchr/testify v1.4.0 // indirect
 	github.com/vektah/gqlparser/v2 v2.1.0
 	github.com/volatiletech/sqlboiler/v4 v4.6.0
 	github.com/volatiletech/strmangle v0.0.1

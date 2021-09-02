@@ -13,6 +13,10 @@ type AlbumArtistRepository interface {
 	GetByName(ctx context.Context, name string) (*dbmodel.AlbumArtist, error)
 }
 
+func NewAlbumArtistRepository(db sqlExecutor) AlbumArtistRepository {
+	return &albumArtistRepository{db: db}
+}
+
 type albumArtistRepository struct {
 	db sqlExecutor
 }

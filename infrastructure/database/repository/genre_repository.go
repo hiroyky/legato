@@ -12,6 +12,10 @@ type GenreRepository interface {
 	GetByName(ctx context.Context, name string) (*dbmodel.Genre, error)
 }
 
+func NewGenreRepository(db sqlExecutor) GenreRepository {
+	return &genreRepository{db: db}
+}
+
 type genreRepository struct {
 	db sqlExecutor
 }

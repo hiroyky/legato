@@ -18,28 +18,6 @@ type Pagination interface {
 	IsPagination()
 }
 
-type Album struct {
-	ID          string       `json:"id"`
-	Name        string       `json:"name"`
-	DiskNo      int          `json:"diskNo"`
-	DiskTotal   int          `json:"diskTotal"`
-	AlbumArtist *AlbumArtist `json:"albumArtist"`
-	Tracks      []*Track     `json:"tracks"`
-}
-
-func (Album) IsNode() {}
-
-type AlbumArtist struct {
-	ID              string                 `json:"id"`
-	Name            string                 `json:"name"`
-	Albums          []*Album               `json:"albums"`
-	AlbumPagination *AlbumArtistPagination `json:"albumPagination"`
-	Tracks          []*Track               `json:"tracks"`
-	TrackPagination *TrackPagination       `json:"trackPagination"`
-}
-
-func (AlbumArtist) IsNode() {}
-
 type AlbumArtistEdge struct {
 	Cursor string       `json:"cursor"`
 	Node   *AlbumArtist `json:"node"`
@@ -111,23 +89,6 @@ type PaginationInfo struct {
 	Limit            int  `json:"limit"`
 	Offset           int  `json:"offset"`
 }
-
-type Track struct {
-	ID          string       `json:"id"`
-	Title       string       `json:"title"`
-	Artist      string       `json:"artist"`
-	Composer    string       `json:"composer"`
-	TrackNo     int          `json:"trackNo"`
-	Lyrics      string       `json:"lyrics"`
-	Comment     string       `json:"comment"`
-	Year        int          `json:"year"`
-	URL         string       `json:"url"`
-	Album       *Album       `json:"album"`
-	Genre       *Genre       `json:"genre"`
-	AlbumArtist *AlbumArtist `json:"albumArtist"`
-}
-
-func (Track) IsNode() {}
 
 type TrackEdge struct {
 	Cursor string `json:"cursor"`
