@@ -15,15 +15,11 @@ func (r *albumArtistResolver) Albums(ctx context.Context, obj *gqlmodel.AlbumArt
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *albumArtistResolver) AlbumPagination(ctx context.Context, obj *gqlmodel.AlbumArtist) (*gqlmodel.AlbumArtistPagination, error) {
+func (r *albumArtistResolver) AlbumPagination(ctx context.Context, obj *gqlmodel.AlbumArtist, limit int, offset *int) (*gqlmodel.AlbumArtistPagination, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *albumArtistResolver) Tracks(ctx context.Context, obj *gqlmodel.AlbumArtist) ([]*gqlmodel.Track, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *albumArtistResolver) TrackPagination(ctx context.Context, obj *gqlmodel.AlbumArtist) (*gqlmodel.TrackPagination, error) {
+func (r *albumArtistResolver) TrackPagination(ctx context.Context, obj *gqlmodel.AlbumArtist, limit int, offset *int) (*gqlmodel.TrackPagination, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

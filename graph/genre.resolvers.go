@@ -11,11 +11,7 @@ import (
 	"github.com/legato/graph/gqlmodel"
 )
 
-func (r *genreResolver) Tracks(ctx context.Context, obj *gqlmodel.Genre) ([]*gqlmodel.Track, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *genreResolver) TrackPagination(ctx context.Context, obj *gqlmodel.Genre) (*gqlmodel.TrackPagination, error) {
+func (r *genreResolver) TrackPagination(ctx context.Context, obj *gqlmodel.Genre, limit int, offset *int) (*gqlmodel.TrackPagination, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
