@@ -24,6 +24,31 @@ func init() {
 	}
 }
 
+func (c *musicController) GetMusic(ctx *gin.Context) {
+	var req request.GetMusicRequest
+	if err := ctx.BindUri(&req); err != nil {
+		ctx.Status(http.StatusBadRequest)
+		return
+	}
+
+	track, err := c.trackRepo.GetByFilePathHash(ctx, req.PathHash)
+	if err != nil {
+		if errors.IsErrorCode(err, errors.TrackNotFoundError) {
+			ctx.Status(http.StatusNotFound)
+			return
+		}
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	buf, err := ioutil.ReadFile(track.FilePath)
+	if err != nil {
+		ctx.Status(http.StatusInternalServerError)
+	}
+	ctx.Writer.Header().Set("Content-Length", fmt.Sprintf("%d", len(buf)))
+	ctx.Writer.Write(buf)
+}
+
 func (c *musicController) GetDownloadMusic(ctx *gin.Context) {
 	var req request.GetDownloadMusicRequest
 	if err := ctx.BindUri(&req); err != nil {

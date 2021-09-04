@@ -36,6 +36,7 @@ func init() {
 		graphQLServer.ServeHTTP(ctx.Writer, ctx.Request)
 	})
 
+	r.GET("/music/:path_hash", controller.MusicController.GetMusic)
 	r.GET("/music/:path_hash/download", controller.MusicController.GetDownloadMusic)
 
 	Router = r
