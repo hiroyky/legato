@@ -76,6 +76,33 @@ func NewTrack(track *dbmodel.Track) *Track {
 	}
 }
 
+func NewAlbumPagination(albums dbmodel.AlbumSlice, total int64, limit int, offset *int) *AlbumPagination {
+	return &AlbumPagination{
+		PageInfo: newPaginationInfo(total, len(albums), limit, offset),
+		Edges:    newAlbumEdges(albums),
+		Nodes:    NewAlbums(albums),
+	}
+}
+
+func newAlbumEdges(albums dbmodel.AlbumSlice) []*AlbumEdge {
+	edges := make([]*AlbumEdge, len(albums))
+	for i, album := range albums {
+		edges[i] = &AlbumEdge{
+			Cursor: gql.EncodeID(AlbumName, album.AlbumID),
+			Node:   NewAlbum(album),
+		}
+	}
+	return edges
+}
+
+func NewAlbums(albums dbmodel.AlbumSlice) []*Album {
+	slice := make([]*Album, len(albums))
+	for i, v := range albums {
+		slice[i] = NewAlbum(v)
+	}
+	return slice
+}
+
 func NewAlbum(album *dbmodel.Album) *Album {
 	return &Album{
 		ID:            gql.EncodeID(AlbumName, album.AlbumID),

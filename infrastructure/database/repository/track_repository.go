@@ -28,24 +28,24 @@ type trackRepository struct {
 
 func (r *trackRepository) GetByID(ctx context.Context, trackID int64) (*dbmodel.Track, error) {
 	track, err := dbmodel.FindTrack(ctx, r.db, int(trackID))
+	if err == sql.ErrNoRows {
+		return nil, errors.New(errors.TrackNotFoundError, nil)
+	}
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.New(errors.TrackNotFoundError, nil)
-		}
-		return nil, err
+		return nil, errors.New(errors.GetTrackFatal, err)
 	}
 	return track, nil
 }
 
 func (r *trackRepository) GetByFilePath(ctx context.Context, filePath string) (*dbmodel.Track, error) {
-	tracks, err := dbmodel.Tracks(qm.Where("file_path_hash=?", genHash(filePath))).All(ctx, r.db)
-	if err != nil {
-		return nil, err
-	}
-	if len(tracks) == 0 {
+	track, err := dbmodel.Tracks(qm.Where("file_path_hash=?", genHash(filePath))).One(ctx, r.db)
+	if err == sql.ErrNoRows {
 		return nil, errors.New(errors.TrackNotFoundError, nil)
 	}
-	return tracks[0], err
+	if err != nil {
+		return nil, errors.New(errors.GetTrackFatal, err)
+	}
+	return track, err
 }
 
 func (r *trackRepository) GetTracks(ctx context.Context, data *dto.GetTracksDTO) (dbmodel.TrackSlice, error) {

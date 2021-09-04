@@ -4,7 +4,7 @@ type AlbumArtist implements Node {
     id: ID!
     name: String!
     albums: [Album]
-    albumPagination(limit: Int!, offset: Int): AlbumArtistPagination!
+    albumPagination(limit: Int!, offset: Int): AlbumPagination!
     trackPagination(limit: Int!, offset: Int): TrackPagination!
 }
 

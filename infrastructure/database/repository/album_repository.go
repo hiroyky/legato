@@ -2,14 +2,18 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"github.com/legato/domain/errors"
 	"github.com/legato/infrastructure/database/dbmodel"
+	"github.com/legato/infrastructure/database/repository/dto"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type AlbumRepository interface {
 	GetByID(ctx context.Context, albumID int64) (*dbmodel.Album, error)
 	GetByName(ctx context.Context, name string) (*dbmodel.Album, error)
+	GetAlbums(ctx context.Context, data *dto.GetAlbumsDTO) (dbmodel.AlbumSlice, error)
+	CountAlbums(ctx context.Context, data *dto.GetAlbumsDTO) (int64, error)
 }
 
 func NewAlbumRepository(db sqlExecutor) AlbumRepository {
@@ -23,18 +27,34 @@ type albumRepository struct {
 func (r *albumRepository) GetByID(ctx context.Context, albumID int64) (*dbmodel.Album, error) {
 	album, err := dbmodel.FindAlbum(ctx, r.db, int(albumID))
 	if err != nil {
-
+		return nil, errors.New(errors.GetAlbumFatal, err)
 	}
 	return album, nil
 }
 
 func (r *albumRepository) GetByName(ctx context.Context, name string) (*dbmodel.Album, error) {
-	albums, err := dbmodel.Albums(qm.Where("name_hash=?", genHash(name))).All(ctx, r.db)
+	album, err := dbmodel.Albums(qm.Where("name_hash=?", genHash(name))).One(ctx, r.db)
+	if err == sql.ErrNoRows {
+		return nil, errors.New(errors.AlbumNotFoundError, nil)
+	}
 	if err != nil {
 		return nil, err
 	}
-	if len(albums) == 0 {
-		return nil, errors.New(errors.AlbumNotFoundError, nil)
+	return album, nil
+}
+
+func (r *albumRepository) GetAlbums(ctx context.Context, data *dto.GetAlbumsDTO) (dbmodel.AlbumSlice, error) {
+	res, err := dbmodel.Albums(appendLimitOffsetMods(data.GenWhereMods(), data.Limit, data.Offset)...).All(ctx, r.db)
+	if err != nil {
+		return nil, errors.New(errors.GetAlbumFatal, err)
 	}
-	return albums[0], nil
+	return res, nil
+}
+
+func (r *albumRepository) CountAlbums(ctx context.Context, data *dto.GetAlbumsDTO) (int64, error) {
+	res, err := dbmodel.Albums(data.GenWhereMods()...).Count(ctx, r.db)
+	if err != nil {
+		return 0, errors.New(errors.CountAlbumFatal, err)
+	}
+	return res, nil
 }

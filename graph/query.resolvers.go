@@ -29,12 +29,8 @@ func (r *queryResolver) Track(ctx context.Context, id string) (*gqlmodel.Track, 
 
 func (r *queryResolver) Tracks(ctx context.Context, limit int, offset *int) (*gqlmodel.TrackPagination, error) {
 	data := &dto.GetTracksDTO{
-		TrackID:       nil,
-		AlbumArtistID: nil,
-		AlbumID:       nil,
-		GenreID:       nil,
-		Limit:         &limit,
-		Offset:        offset,
+		Limit:  &limit,
+		Offset: offset,
 	}
 
 	tracks, err := r.TrackRepository.GetTracks(ctx, data)
@@ -50,15 +46,43 @@ func (r *queryResolver) Tracks(ctx context.Context, limit int, offset *int) (*gq
 }
 
 func (r *queryResolver) Album(ctx context.Context, id string) (*gqlmodel.Album, error) {
-	panic(fmt.Errorf("not implemented"))
+	decodedID, err := gql.DecodeID(id)
+	if err != nil {
+		return nil, err
+	}
+	album, err := r.AlbumRepository.GetByID(ctx, decodedID)
+	if err != nil {
+		return nil, err
+	}
+	return gqlmodel.NewAlbum(album), nil
 }
 
 func (r *queryResolver) Albums(ctx context.Context, limit int, offset *int) (*gqlmodel.AlbumPagination, error) {
-	panic(fmt.Errorf("not implemented"))
+	data := &dto.GetAlbumsDTO{
+		Limit:  &limit,
+		Offset: offset,
+	}
+	albums, err := r.AlbumRepository.GetAlbums(ctx, data)
+	if err != nil {
+		return nil, err
+	}
+	total, err := r.AlbumRepository.CountAlbums(ctx, data)
+	if err != nil {
+		return nil, err
+	}
+	return gqlmodel.NewAlbumPagination(albums, total, limit, offset), nil
 }
 
 func (r *queryResolver) AlbumArtist(ctx context.Context, id string) (*gqlmodel.AlbumArtist, error) {
-	panic(fmt.Errorf("not implemented"))
+	decodedID, err := gql.DecodeID(id)
+	if err != nil {
+		return nil, err
+	}
+	albumArtist, err := r.AlbumArtistRepository.GetByID(ctx, decodedID)
+	if err != nil {
+		return nil, err
+	}
+	return gqlmodel.NewAlbumArtist(albumArtist), nil
 }
 
 func (r *queryResolver) AlbumArtists(ctx context.Context, limit int, offset *int) (*gqlmodel.AlbumArtistPagination, error) {
@@ -66,7 +90,15 @@ func (r *queryResolver) AlbumArtists(ctx context.Context, limit int, offset *int
 }
 
 func (r *queryResolver) Genre(ctx context.Context, id string) (*gqlmodel.Genre, error) {
-	panic(fmt.Errorf("not implemented"))
+	decodedID, err := gql.DecodeID(id)
+	if err != nil {
+		return nil, err
+	}
+	genre, err := r.GenreRepository.GetByID(ctx, decodedID)
+	if err != nil {
+		return nil, err
+	}
+	return gqlmodel.NewGenre(genre), nil
 }
 
 func (r *queryResolver) Genres(ctx context.Context, limit int, offset *int) (*gqlmodel.GenrePagination, error) {

@@ -165,7 +165,7 @@ type AlbumResolver interface {
 }
 type AlbumArtistResolver interface {
 	Albums(ctx context.Context, obj *gqlmodel.AlbumArtist) ([]*gqlmodel.Album, error)
-	AlbumPagination(ctx context.Context, obj *gqlmodel.AlbumArtist, limit int, offset *int) (*gqlmodel.AlbumArtistPagination, error)
+	AlbumPagination(ctx context.Context, obj *gqlmodel.AlbumArtist, limit int, offset *int) (*gqlmodel.AlbumPagination, error)
 	TrackPagination(ctx context.Context, obj *gqlmodel.AlbumArtist, limit int, offset *int) (*gqlmodel.TrackPagination, error)
 }
 type GenreResolver interface {
@@ -797,7 +797,7 @@ type AlbumArtist implements Node {
     id: ID!
     name: String!
     albums: [Album]
-    albumPagination(limit: Int!, offset: Int): AlbumArtistPagination!
+    albumPagination(limit: Int!, offset: Int): AlbumPagination!
     trackPagination(limit: Int!, offset: Int): TrackPagination!
 }
 
@@ -1550,9 +1550,9 @@ func (ec *executionContext) _AlbumArtist_albumPagination(ctx context.Context, fi
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*gqlmodel.AlbumArtistPagination)
+	res := resTmp.(*gqlmodel.AlbumPagination)
 	fc.Result = res
-	return ec.marshalNAlbumArtistPagination2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistPagination(ctx, field.Selections, res)
+	return ec.marshalNAlbumPagination2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumPagination(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AlbumArtist_trackPagination(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.AlbumArtist) (ret graphql.Marshaler) {

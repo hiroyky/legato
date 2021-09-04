@@ -15,6 +15,8 @@ const (
 
 	GetTrackFatal   ErrorCode = "GetTrackFatal"
 	CountTrackFatal ErrorCode = "CountTrackFatal"
+	GetAlbumFatal   ErrorCode = "GetAlbumFatal"
+	CountAlbumFatal ErrorCode = "CountAlbumFatal"
 )
 
 func (code ErrorCode) ToString() string {
