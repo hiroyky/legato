@@ -7,6 +7,58 @@ import (
 	"github.com/legato/lib/gql"
 )
 
+func newPaginationInfo(total int64, count, limit int, offset *int) *PaginationInfo {
+	o := 0
+	t := int(total)
+	if offset != nil {
+		o = *offset
+	}
+	page := 1
+	pageLength := 1
+	if limit > 0 {
+		page = (o / limit) + 1
+		pageLength = (t / limit) + 1
+	}
+
+	return &PaginationInfo{
+		Page:             page,
+		PaginationLength: pageLength,
+		HasNextPage:      o+limit < t,
+		HasPreviousPage:  o > 0,
+		Count:            count,
+		TotalCount:       t,
+		Limit:            limit,
+		Offset:           o,
+	}
+}
+
+func NewTrackPagination(tracks dbmodel.TrackSlice, total int64, limit int, offset *int) *TrackPagination {
+	return &TrackPagination{
+		PageInfo: newPaginationInfo(total, len(tracks), limit, offset),
+		Edges:    newTrackEdges(tracks),
+		Nodes:    NewTracks(tracks),
+	}
+}
+
+func newTrackEdges(tracks dbmodel.TrackSlice) []*TrackEdge {
+	edges := make([]*TrackEdge, len(tracks))
+	for i, track := range tracks {
+		edges[i] = &TrackEdge{
+			Cursor: gql.EncodeID(TrackName, track.TrackID),
+			Node:   NewTrack(track),
+		}
+	}
+	return edges
+}
+
+func NewTracks(tracks dbmodel.TrackSlice) []*Track {
+	slice := make([]*Track, len(tracks))
+	for i, v := range tracks {
+		slice[i] = NewTrack(v)
+	}
+	return slice
+}
+
 func NewTrack(track *dbmodel.Track) *Track {
 	return &Track{
 		ID:            gql.EncodeID(TrackName, track.TrackID),
@@ -43,7 +95,7 @@ func NewAlbumArtist(albumArtist *dbmodel.AlbumArtist) *AlbumArtist {
 
 func NewGenre(genre *dbmodel.Genre) *Genre {
 	return &Genre{
-		ID:              gql.EncodeID(GenreName, genre.GenreID),
-		Name:            genre.Name,
+		ID:   gql.EncodeID(GenreName, genre.GenreID),
+		Name: genre.Name,
 	}
 }

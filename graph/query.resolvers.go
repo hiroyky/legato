@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"github.com/legato/infrastructure/database/repository/dto"
 
 	"github.com/legato/graph/generated"
 	"github.com/legato/graph/gqlmodel"
@@ -27,7 +28,25 @@ func (r *queryResolver) Track(ctx context.Context, id string) (*gqlmodel.Track, 
 }
 
 func (r *queryResolver) Tracks(ctx context.Context, limit int, offset *int) (*gqlmodel.TrackPagination, error) {
-	panic(fmt.Errorf("not implemented"))
+	data := &dto.GetTracksDTO{
+		TrackID:       nil,
+		AlbumArtistID: nil,
+		AlbumID:       nil,
+		GenreID:       nil,
+		Limit:         &limit,
+		Offset:        offset,
+	}
+
+	tracks, err := r.TrackRepository.GetTracks(ctx, data)
+	if err != nil {
+		return nil, err
+	}
+	total, err := r.TrackRepository.CountTracks(ctx, data)
+	if err != nil {
+		return nil, err
+	}
+
+	return gqlmodel.NewTrackPagination(tracks, total, limit, offset), nil
 }
 
 func (r *queryResolver) Album(ctx context.Context, id string) (*gqlmodel.Album, error) {

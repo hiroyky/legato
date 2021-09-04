@@ -12,6 +12,9 @@ const (
 	AlbumNotFoundError       ErrorCode = "AlbumNotFoundError"
 	AlbumArtistNotFoundError ErrorCode = "AlbumArtistNotFoundError"
 	GenreNotFoundError       ErrorCode = "GenreNotFoundError"
+
+	GetTrackFatal   ErrorCode = "GetTrackFatal"
+	CountTrackFatal ErrorCode = "CountTrackFatal"
 )
 
 func (code ErrorCode) ToString() string {
