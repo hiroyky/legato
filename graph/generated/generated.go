@@ -138,6 +138,7 @@ type ComplexityRoot struct {
 		Artist      func(childComplexity int) int
 		Comment     func(childComplexity int) int
 		Composer    func(childComplexity int) int
+		DownloadURL func(childComplexity int) int
 		Genre       func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Lyrics      func(childComplexity int) int
@@ -635,6 +636,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Track.Composer(childComplexity), true
 
+	case "Track.downloadUrl":
+		if e.complexity.Track.DownloadURL == nil {
+			break
+		}
+
+		return e.complexity.Track.DownloadURL(childComplexity), true
+
 	case "Track.genre":
 		if e.complexity.Track.Genre == nil {
 			break
@@ -901,6 +909,7 @@ type Track implements Node {
     comment: String!
     year: Int!
     url: String!
+    downloadUrl: String!
     album: Album!
     genre: Genre!
     albumArtist: AlbumArtist!
@@ -3358,6 +3367,41 @@ func (ec *executionContext) _Track_url(ctx context.Context, field graphql.Collec
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Track_downloadUrl(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Track) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Track",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DownloadURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Track_album(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Track) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -5525,6 +5569,11 @@ func (ec *executionContext) _Track(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "url":
 			out.Values[i] = ec._Track_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "downloadUrl":
+			out.Values[i] = ec._Track_downloadUrl(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}

@@ -15,6 +15,7 @@ type Track struct {
 	Comment       string `json:"comment"`
 	Year          int    `json:"year"`
 	URL           string `json:"url"`
+	DownloadURL   string `json:"download_url"`
 	AlbumID       string `json:"album"`
 	GenreID       string `json:"genre"`
 	AlbumArtistID string `json:"albumArtist"`

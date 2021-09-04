@@ -12,6 +12,7 @@ import (
 type TrackRepository interface {
 	GetByID(ctx context.Context, trackID int64) (*dbmodel.Track, error)
 	GetByFilePath(ctx context.Context, filePath string) (*dbmodel.Track, error)
+	GetByFilePathHash(ctx context.Context, filePathHash string) (*dbmodel.Track, error)
 	GetTracks(ctx context.Context, data *dto.GetTracksDTO) (dbmodel.TrackSlice, error)
 	CountTracks(ctx context.Context, data *dto.GetTracksDTO) (int64, error)
 }
@@ -39,6 +40,17 @@ func (r *trackRepository) GetByID(ctx context.Context, trackID int64) (*dbmodel.
 
 func (r *trackRepository) GetByFilePath(ctx context.Context, filePath string) (*dbmodel.Track, error) {
 	track, err := dbmodel.Tracks(qm.Where("file_path_hash=?", genHash(filePath))).One(ctx, r.db)
+	if err == sql.ErrNoRows {
+		return nil, errors.New(errors.TrackNotFoundError, nil)
+	}
+	if err != nil {
+		return nil, errors.New(errors.GetTrackFatal, err)
+	}
+	return track, err
+}
+
+func (r *trackRepository) GetByFilePathHash(ctx context.Context, filePathHash string) (*dbmodel.Track, error) {
+	track, err := dbmodel.Tracks(qm.Where("file_path_hash=?", filePathHash)).One(ctx, r.db)
 	if err == sql.ErrNoRows {
 		return nil, errors.New(errors.TrackNotFoundError, nil)
 	}

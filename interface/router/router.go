@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/legato/graph"
 	"github.com/legato/graph/generated"
+	"github.com/legato/interface/controller"
 	"github.com/legato/registry"
 	"net/http"
 )
@@ -34,6 +35,9 @@ func init() {
 	r.POST("/graphql", func(ctx *gin.Context) {
 		graphQLServer.ServeHTTP(ctx.Writer, ctx.Request)
 	})
+
+	r.GET("/music/:path_hash", controller.MusicController.GetMusic)
+	r.GET("/music/:path_hash/download", controller.MusicController.GetDownloadMusic)
 
 	Router = r
 }
