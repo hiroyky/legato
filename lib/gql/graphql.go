@@ -44,3 +44,12 @@ func DecodeIDIfNotNil(graphID *string) (*int64, error) {
 	}
 	return &id, nil
 }
+
+func DecodedIDIntPtr(graphID string) (*int, error) {
+	decoded, err := DecodeID(graphID)
+	if err != nil {
+		return nil, err
+	}
+	intID := int(decoded)
+	return &intID, nil
+}

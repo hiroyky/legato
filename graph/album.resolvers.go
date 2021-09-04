@@ -5,7 +5,7 @@ package graph
 
 import (
 	"context"
-	"fmt"
+	"github.com/legato/infrastructure/database/repository/dto"
 
 	"github.com/legato/graph/generated"
 	"github.com/legato/graph/gqlmodel"
@@ -25,7 +25,15 @@ func (r *albumResolver) AlbumArtist(ctx context.Context, obj *gqlmodel.Album) (*
 }
 
 func (r *albumResolver) Tracks(ctx context.Context, obj *gqlmodel.Album) ([]*gqlmodel.Track, error) {
-	panic(fmt.Errorf("not implemented"))
+	albumID, err := gql.DecodedIDIntPtr(obj.ID)
+	data := &dto.GetTracksDTO{
+		AlbumID: albumID,
+	}
+	tracks, err := r.TrackRepository.GetTracks(ctx, data)
+	if err != nil {
+		return nil, err
+	}
+	return gqlmodel.NewTracks(tracks), err
 }
 
 // Album returns generated.AlbumResolver implementation.
