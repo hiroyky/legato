@@ -6,7 +6,9 @@ import (
 )
 
 type environment struct {
-	Port          int64  `envconfig:"PORT"`
+	HTTPProtocol  string `envcofig:"HTTP_PROTOCOL"`
+	APIHostName   string `envconfig:"API_HOSTNAME"`
+	APIPort       int64  `envconfig:"API_PORT"`
 	MySQLHostName string `envconfig:"MYSQL_HOST_NAME"`
 	MySQLPort     int64  `envconfig:"MYSQL_PORT"`
 	MySQLDatabase string `envconfig:"MYSQL_DATABASE"`

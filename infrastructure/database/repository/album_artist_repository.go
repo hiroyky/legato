@@ -5,12 +5,19 @@ import (
 	"database/sql"
 	"github.com/legato/domain/errors"
 	"github.com/legato/infrastructure/database/dbmodel"
+	"github.com/legato/infrastructure/database/repository/dto"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type AlbumArtistRepository interface {
 	GetByID(ctx context.Context, albumArtistID int64) (*dbmodel.AlbumArtist, error)
 	GetByName(ctx context.Context, name string) (*dbmodel.AlbumArtist, error)
+	GetAlbumArtists(ctx context.Context, data *dto.GetAlbumArtistsDTO) (dbmodel.AlbumArtistSlice, error)
+	CountAlbumArtists(ctx context.Context, data *dto.GetAlbumArtistsDTO) (int64, error)
+}
+
+func NewAlbumArtistRepository(db sqlExecutor) AlbumArtistRepository {
+	return &albumArtistRepository{db: db}
 }
 
 type albumArtistRepository struct {
@@ -37,4 +44,20 @@ func (r *albumArtistRepository) GetByName(ctx context.Context, name string) (*db
 		return nil, errors.New(errors.AlbumArtistNotFoundError, nil)
 	}
 	return albumArtists[0], nil
+}
+
+func (r *albumArtistRepository) GetAlbumArtists(ctx context.Context, data *dto.GetAlbumArtistsDTO) (dbmodel.AlbumArtistSlice, error) {
+	albumArtists, err := dbmodel.AlbumArtists(appendLimitOffsetMods(data.GenWhereMods(), data.Limit, data.Offset)...).All(ctx, r.db)
+	if err != nil {
+		return nil, errors.New(errors.GetAlbumArtistFatal, err)
+	}
+	return albumArtists, nil
+}
+
+func (r *albumArtistRepository) CountAlbumArtists(ctx context.Context, data *dto.GetAlbumArtistsDTO) (int64, error) {
+	total, err := dbmodel.AlbumArtists(data.GenWhereMods()...).Count(ctx, r.db)
+	if err != nil {
+		return total, errors.New(errors.CountAlbumArtistFatal, err)
+	}
+	return total, nil
 }

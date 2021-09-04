@@ -3,8 +3,7 @@
 type Genre implements Node {
     id: ID!
     name: String!
-    tracks: [Track]
-    trackPagination: TrackPagination!
+    trackPagination(limit: Int!, offset: Int): TrackPagination!
 }
 
 type GenreEdge implements Edge {

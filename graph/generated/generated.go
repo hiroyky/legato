@@ -36,7 +36,11 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Album() AlbumResolver
+	AlbumArtist() AlbumArtistResolver
+	Genre() GenreResolver
 	Query() QueryResolver
+	Track() TrackResolver
 }
 
 type DirectiveRoot struct {
@@ -53,12 +57,11 @@ type ComplexityRoot struct {
 	}
 
 	AlbumArtist struct {
-		AlbumPagination func(childComplexity int) int
+		AlbumPagination func(childComplexity int, limit int, offset *int) int
 		Albums          func(childComplexity int) int
 		ID              func(childComplexity int) int
 		Name            func(childComplexity int) int
-		TrackPagination func(childComplexity int) int
-		Tracks          func(childComplexity int) int
+		TrackPagination func(childComplexity int, limit int, offset *int) int
 	}
 
 	AlbumArtistEdge struct {
@@ -86,8 +89,7 @@ type ComplexityRoot struct {
 	Genre struct {
 		ID              func(childComplexity int) int
 		Name            func(childComplexity int) int
-		TrackPagination func(childComplexity int) int
-		Tracks          func(childComplexity int) int
+		TrackPagination func(childComplexity int, limit int, offset *int) int
 	}
 
 	GenreEdge struct {
@@ -157,6 +159,18 @@ type ComplexityRoot struct {
 	}
 }
 
+type AlbumResolver interface {
+	AlbumArtist(ctx context.Context, obj *gqlmodel.Album) (*gqlmodel.AlbumArtist, error)
+	Tracks(ctx context.Context, obj *gqlmodel.Album) ([]*gqlmodel.Track, error)
+}
+type AlbumArtistResolver interface {
+	Albums(ctx context.Context, obj *gqlmodel.AlbumArtist) ([]*gqlmodel.Album, error)
+	AlbumPagination(ctx context.Context, obj *gqlmodel.AlbumArtist, limit int, offset *int) (*gqlmodel.AlbumPagination, error)
+	TrackPagination(ctx context.Context, obj *gqlmodel.AlbumArtist, limit int, offset *int) (*gqlmodel.TrackPagination, error)
+}
+type GenreResolver interface {
+	TrackPagination(ctx context.Context, obj *gqlmodel.Genre, limit int, offset *int) (*gqlmodel.TrackPagination, error)
+}
 type QueryResolver interface {
 	Track(ctx context.Context, id string) (*gqlmodel.Track, error)
 	Tracks(ctx context.Context, limit int, offset *int) (*gqlmodel.TrackPagination, error)
@@ -166,6 +180,11 @@ type QueryResolver interface {
 	AlbumArtists(ctx context.Context, limit int, offset *int) (*gqlmodel.AlbumArtistPagination, error)
 	Genre(ctx context.Context, id string) (*gqlmodel.Genre, error)
 	Genres(ctx context.Context, limit int, offset *int) (*gqlmodel.GenrePagination, error)
+}
+type TrackResolver interface {
+	Album(ctx context.Context, obj *gqlmodel.Track) (*gqlmodel.Album, error)
+	Genre(ctx context.Context, obj *gqlmodel.Track) (*gqlmodel.Genre, error)
+	AlbumArtist(ctx context.Context, obj *gqlmodel.Track) (*gqlmodel.AlbumArtist, error)
 }
 
 type executableSchema struct {
@@ -230,7 +249,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.AlbumArtist.AlbumPagination(childComplexity), true
+		args, err := ec.field_AlbumArtist_albumPagination_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.AlbumArtist.AlbumPagination(childComplexity, args["limit"].(int), args["offset"].(*int)), true
 
 	case "AlbumArtist.albums":
 		if e.complexity.AlbumArtist.Albums == nil {
@@ -258,14 +282,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.AlbumArtist.TrackPagination(childComplexity), true
-
-	case "AlbumArtist.tracks":
-		if e.complexity.AlbumArtist.Tracks == nil {
-			break
+		args, err := ec.field_AlbumArtist_trackPagination_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
 		}
 
-		return e.complexity.AlbumArtist.Tracks(childComplexity), true
+		return e.complexity.AlbumArtist.TrackPagination(childComplexity, args["limit"].(int), args["offset"].(*int)), true
 
 	case "AlbumArtistEdge.cursor":
 		if e.complexity.AlbumArtistEdge.Cursor == nil {
@@ -356,14 +378,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Genre.TrackPagination(childComplexity), true
-
-	case "Genre.tracks":
-		if e.complexity.Genre.Tracks == nil {
-			break
+		args, err := ec.field_Genre_trackPagination_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
 		}
 
-		return e.complexity.Genre.Tracks(childComplexity), true
+		return e.complexity.Genre.TrackPagination(childComplexity, args["limit"].(int), args["offset"].(*int)), true
 
 	case "GenreEdge.cursor":
 		if e.complexity.GenreEdge.Cursor == nil {
@@ -777,9 +797,8 @@ type AlbumArtist implements Node {
     id: ID!
     name: String!
     albums: [Album]
-    albumPagination: AlbumArtistPagination!
-    tracks: [Track]
-    trackPagination: TrackPagination!
+    albumPagination(limit: Int!, offset: Int): AlbumPagination!
+    trackPagination(limit: Int!, offset: Int): TrackPagination!
 }
 
 type AlbumArtistEdge implements Edge {
@@ -842,8 +861,7 @@ type PageInfo {
 type Genre implements Node {
     id: ID!
     name: String!
-    tracks: [Track]
-    trackPagination: TrackPagination!
+    trackPagination(limit: Int!, offset: Int): TrackPagination!
 }
 
 type GenreEdge implements Edge {
@@ -904,6 +922,78 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_AlbumArtist_albumPagination_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["limit"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["limit"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_AlbumArtist_trackPagination_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["limit"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["limit"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Genre_trackPagination_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["limit"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["limit"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg1
+	return args, nil
+}
 
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1265,14 +1355,14 @@ func (ec *executionContext) _Album_albumArtist(ctx context.Context, field graphq
 		Object:     "Album",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.AlbumArtist, nil
+		return ec.resolvers.Album().AlbumArtist(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1300,14 +1390,14 @@ func (ec *executionContext) _Album_tracks(ctx context.Context, field graphql.Col
 		Object:     "Album",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Tracks, nil
+		return ec.resolvers.Album().Tracks(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1402,14 +1492,14 @@ func (ec *executionContext) _AlbumArtist_albums(ctx context.Context, field graph
 		Object:     "AlbumArtist",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Albums, nil
+		return ec.resolvers.AlbumArtist().Albums(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1434,14 +1524,21 @@ func (ec *executionContext) _AlbumArtist_albumPagination(ctx context.Context, fi
 		Object:     "AlbumArtist",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_AlbumArtist_albumPagination_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.AlbumPagination, nil
+		return ec.resolvers.AlbumArtist().AlbumPagination(rctx, obj, args["limit"].(int), args["offset"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1453,41 +1550,9 @@ func (ec *executionContext) _AlbumArtist_albumPagination(ctx context.Context, fi
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*gqlmodel.AlbumArtistPagination)
+	res := resTmp.(*gqlmodel.AlbumPagination)
 	fc.Result = res
-	return ec.marshalNAlbumArtistPagination2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistPagination(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _AlbumArtist_tracks(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.AlbumArtist) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "AlbumArtist",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Tracks, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*gqlmodel.Track)
-	fc.Result = res
-	return ec.marshalOTrack2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx, field.Selections, res)
+	return ec.marshalNAlbumPagination2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumPagination(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AlbumArtist_trackPagination(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.AlbumArtist) (ret graphql.Marshaler) {
@@ -1501,14 +1566,21 @@ func (ec *executionContext) _AlbumArtist_trackPagination(ctx context.Context, fi
 		Object:     "AlbumArtist",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_AlbumArtist_trackPagination_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.TrackPagination, nil
+		return ec.resolvers.AlbumArtist().TrackPagination(rctx, obj, args["limit"].(int), args["offset"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1945,38 +2017,6 @@ func (ec *executionContext) _Genre_name(ctx context.Context, field graphql.Colle
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Genre_tracks(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Genre) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Genre",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Tracks, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*gqlmodel.Track)
-	fc.Result = res
-	return ec.marshalOTrack2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Genre_trackPagination(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Genre) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1988,14 +2028,21 @@ func (ec *executionContext) _Genre_trackPagination(ctx context.Context, field gr
 		Object:     "Genre",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Genre_trackPagination_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.TrackPagination, nil
+		return ec.resolvers.Genre().TrackPagination(rctx, obj, args["limit"].(int), args["offset"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3322,14 +3369,14 @@ func (ec *executionContext) _Track_album(ctx context.Context, field graphql.Coll
 		Object:     "Track",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Album, nil
+		return ec.resolvers.Track().Album(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3357,14 +3404,14 @@ func (ec *executionContext) _Track_genre(ctx context.Context, field graphql.Coll
 		Object:     "Track",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Genre, nil
+		return ec.resolvers.Track().Genre(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3392,14 +3439,14 @@ func (ec *executionContext) _Track_albumArtist(ctx context.Context, field graphq
 		Object:     "Track",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.AlbumArtist, nil
+		return ec.resolvers.Track().AlbumArtist(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4820,30 +4867,48 @@ func (ec *executionContext) _Album(ctx context.Context, sel ast.SelectionSet, ob
 		case "id":
 			out.Values[i] = ec._Album_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
 			out.Values[i] = ec._Album_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "diskNo":
 			out.Values[i] = ec._Album_diskNo(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "diskTotal":
 			out.Values[i] = ec._Album_diskTotal(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "albumArtist":
-			out.Values[i] = ec._Album_albumArtist(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Album_albumArtist(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "tracks":
-			out.Values[i] = ec._Album_tracks(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Album_tracks(ctx, field, obj)
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4869,27 +4934,52 @@ func (ec *executionContext) _AlbumArtist(ctx context.Context, sel ast.SelectionS
 		case "id":
 			out.Values[i] = ec._AlbumArtist_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
 			out.Values[i] = ec._AlbumArtist_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "albums":
-			out.Values[i] = ec._AlbumArtist_albums(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._AlbumArtist_albums(ctx, field, obj)
+				return res
+			})
 		case "albumPagination":
-			out.Values[i] = ec._AlbumArtist_albumPagination(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "tracks":
-			out.Values[i] = ec._AlbumArtist_tracks(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._AlbumArtist_albumPagination(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "trackPagination":
-			out.Values[i] = ec._AlbumArtist_trackPagination(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._AlbumArtist_trackPagination(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5053,20 +5143,27 @@ func (ec *executionContext) _Genre(ctx context.Context, sel ast.SelectionSet, ob
 		case "id":
 			out.Values[i] = ec._Genre_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
 			out.Values[i] = ec._Genre_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
-		case "tracks":
-			out.Values[i] = ec._Genre_tracks(ctx, field, obj)
 		case "trackPagination":
-			out.Values[i] = ec._Genre_trackPagination(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Genre_trackPagination(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5389,63 +5486,90 @@ func (ec *executionContext) _Track(ctx context.Context, sel ast.SelectionSet, ob
 		case "id":
 			out.Values[i] = ec._Track_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "title":
 			out.Values[i] = ec._Track_title(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "artist":
 			out.Values[i] = ec._Track_artist(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "composer":
 			out.Values[i] = ec._Track_composer(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "trackNo":
 			out.Values[i] = ec._Track_trackNo(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "lyrics":
 			out.Values[i] = ec._Track_lyrics(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "comment":
 			out.Values[i] = ec._Track_comment(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "year":
 			out.Values[i] = ec._Track_year(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "url":
 			out.Values[i] = ec._Track_url(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "album":
-			out.Values[i] = ec._Track_album(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Track_album(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "genre":
-			out.Values[i] = ec._Track_genre(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Track_genre(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "albumArtist":
-			out.Values[i] = ec._Track_albumArtist(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Track_albumArtist(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5771,6 +5895,10 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNAlbum2githubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx context.Context, sel ast.SelectionSet, v gqlmodel.Album) graphql.Marshaler {
+	return ec._Album(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNAlbum2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.Album) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -5816,6 +5944,10 @@ func (ec *executionContext) marshalNAlbum2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgql
 		return graphql.Null
 	}
 	return ec._Album(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNAlbumArtist2githubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtist(ctx context.Context, sel ast.SelectionSet, v gqlmodel.AlbumArtist) graphql.Marshaler {
+	return ec._AlbumArtist(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNAlbumArtist2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.AlbumArtist) graphql.Marshaler {
@@ -6015,6 +6147,10 @@ func (ec *executionContext) marshalNCursor2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNGenre2githubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenre(ctx context.Context, sel ast.SelectionSet, v gqlmodel.Genre) graphql.Marshaler {
+	return ec._Genre(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNGenre2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenreᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.Genre) graphql.Marshaler {

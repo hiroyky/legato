@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/legato/graph"
 	"github.com/legato/graph/generated"
+	"github.com/legato/registry"
 	"net/http"
 )
 
@@ -15,7 +16,12 @@ func init() {
 	r := gin.Default()
 
 	graphQLServer := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
-		Resolvers: &graph.Resolver{},
+		Resolvers: &graph.Resolver{
+			TrackRepository:       registry.NewTrackRepository(),
+			AlbumRepository:       registry.NewAlbumRepository(),
+			AlbumArtistRepository: registry.NewAlbumArtistRepository(),
+			GenreRepository:       registry.NewGenreRepository(),
+		},
 	}))
 
 	r.GET("/", func(ctx *gin.Context) {
