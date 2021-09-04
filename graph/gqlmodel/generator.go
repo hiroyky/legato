@@ -113,11 +113,65 @@ func NewAlbum(album *dbmodel.Album) *Album {
 	}
 }
 
+func NewAlbumArtistPagination(albumArtists dbmodel.AlbumArtistSlice, total int64, limit int, offset *int) *AlbumArtistPagination {
+	return &AlbumArtistPagination{
+		PageInfo: newPaginationInfo(total, len(albumArtists), limit, offset),
+		Edges:    newAlbumArtistEdges(albumArtists),
+		Nodes:    NewAlbumArtists(albumArtists),
+	}
+}
+
+func newAlbumArtistEdges(albumArtists dbmodel.AlbumArtistSlice) []*AlbumArtistEdge {
+	edges := make([]*AlbumArtistEdge, len(albumArtists))
+	for i, aa := range albumArtists {
+		edges[i] = &AlbumArtistEdge{
+			Cursor: gql.EncodeID(AlbumArtistName, aa.AlbumArtistID),
+			Node:   NewAlbumArtist(aa),
+		}
+	}
+	return edges
+}
+
+func NewAlbumArtists(albumArtists dbmodel.AlbumArtistSlice) []*AlbumArtist {
+	slice := make([]*AlbumArtist, len(albumArtists))
+	for i, v := range albumArtists {
+		slice[i] = NewAlbumArtist(v)
+	}
+	return slice
+}
+
 func NewAlbumArtist(albumArtist *dbmodel.AlbumArtist) *AlbumArtist {
 	return &AlbumArtist{
 		ID:   gql.EncodeID(AlbumArtistName, albumArtist.AlbumArtistID),
 		Name: albumArtist.Name,
 	}
+}
+
+func NewGenrePagination(genres dbmodel.GenreSlice, total int64, limit int, offset *int) *GenrePagination {
+	return &GenrePagination{
+		PageInfo: newPaginationInfo(total, len(genres), limit, offset),
+		Edges:    newGenreEdges(genres),
+		Nodes:    NewGenres(genres),
+	}
+}
+
+func newGenreEdges(genres dbmodel.GenreSlice) []*GenreEdge {
+	edges := make([]*GenreEdge, len(genres))
+	for i, genre := range genres {
+		edges[i] = &GenreEdge{
+			Cursor: gql.EncodeID(GenreName, genre.GenreID),
+			Node:   NewGenre(genre),
+		}
+	}
+	return edges
+}
+
+func NewGenres(genres dbmodel.GenreSlice) []*Genre {
+	slice := make([]*Genre, len(genres))
+	for i, v := range genres {
+		slice[i] = NewGenre(v)
+	}
+	return slice
 }
 
 func NewGenre(genre *dbmodel.Genre) *Genre {

@@ -13,10 +13,14 @@ const (
 	AlbumArtistNotFoundError ErrorCode = "AlbumArtistNotFoundError"
 	GenreNotFoundError       ErrorCode = "GenreNotFoundError"
 
-	GetTrackFatal   ErrorCode = "GetTrackFatal"
-	CountTrackFatal ErrorCode = "CountTrackFatal"
-	GetAlbumFatal   ErrorCode = "GetAlbumFatal"
-	CountAlbumFatal ErrorCode = "CountAlbumFatal"
+	GetTrackFatal         ErrorCode = "GetTrackFatal"
+	CountTrackFatal       ErrorCode = "CountTrackFatal"
+	GetAlbumFatal         ErrorCode = "GetAlbumFatal"
+	CountAlbumFatal       ErrorCode = "CountAlbumFatal"
+	GetAlbumArtistFatal   ErrorCode = "GetAlbumArtistFatal"
+	CountAlbumArtistFatal ErrorCode = "CountAlbumArtistFatal"
+	GetGenreFatal         ErrorCode = "GetGenreFatal"
+	CountGenreFatal       ErrorCode = "CountGenreFatal"
 )
 
 func (code ErrorCode) ToString() string {

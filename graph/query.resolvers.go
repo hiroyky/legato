@@ -5,8 +5,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/legato/graph/generated"
 	"github.com/legato/graph/gqlmodel"
 	"github.com/legato/infrastructure/database/repository/dto"
@@ -86,7 +84,19 @@ func (r *queryResolver) AlbumArtist(ctx context.Context, id string) (*gqlmodel.A
 }
 
 func (r *queryResolver) AlbumArtists(ctx context.Context, limit int, offset *int) (*gqlmodel.AlbumArtistPagination, error) {
-	panic(fmt.Errorf("not implemented"))
+	data := &dto.GetAlbumArtistsDTO{
+		Limit:  &limit,
+		Offset: offset,
+	}
+	albumArtists, err := r.AlbumArtistRepository.GetAlbumArtists(ctx, data)
+	if err != nil {
+		return nil, err
+	}
+	total, err := r.AlbumArtistRepository.CountAlbumArtists(ctx, data)
+	if err != nil {
+		return nil, err
+	}
+	return gqlmodel.NewAlbumArtistPagination(albumArtists, total, limit, offset), nil
 }
 
 func (r *queryResolver) Genre(ctx context.Context, id string) (*gqlmodel.Genre, error) {
@@ -102,7 +112,19 @@ func (r *queryResolver) Genre(ctx context.Context, id string) (*gqlmodel.Genre, 
 }
 
 func (r *queryResolver) Genres(ctx context.Context, limit int, offset *int) (*gqlmodel.GenrePagination, error) {
-	panic(fmt.Errorf("not implemented"))
+	data := &dto.GetGenresDTO{
+		Limit:  &limit,
+		Offset: offset,
+	}
+	genres, err := r.GenreRepository.GetGenres(ctx, data)
+	if err != nil {
+		return nil, err
+	}
+	total, err := r.GenreRepository.CountGenres(ctx, data)
+	if err != nil {
+		return nil, err
+	}
+	return gqlmodel.NewGenrePagination(genres, total, limit, offset), nil
 }
 
 // Query returns generated.QueryResolver implementation.
