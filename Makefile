@@ -33,3 +33,11 @@ clean:
 build_prod:
 	docker compose --file $(PROD_DOCKER_COMPOSE_FILE) build --no-cache
 	docker compose --file $(PROD_DOCKER_COMPOSE_FILE) up -d
+
+build: _build_app _build_import_sounds
+
+_build_app:
+	go build -o ./dist/app
+
+_build_import_sounds:
+	go build -o ./dist/import_sounds ./subsystem/import_sounds
