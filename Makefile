@@ -27,6 +27,9 @@ fmt:
 test:
 	docker compose --file $(LOCAL_DOCKER_COMPOSE_FILE) exec legato go test ./...
 
+exec_import_sounds:
+	docker compose --file $(LOCAL_DOCKER_COMPOSE_FILE) exec legato go run ./subsystem/import_sounds/main.go
+
 clean:
 	rm -rf $(DST_DIR) ./dist
 
