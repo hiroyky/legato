@@ -2,7 +2,7 @@ package registry
 
 import (
 	"context"
-	"github.com/legato/service"
+	"github.com/hiroyky/legato/service"
 )
 
 func NewMetadataService(_ context.Context) service.MetadataService {

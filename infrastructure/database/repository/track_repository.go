@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"github.com/legato/domain/errors"
-	"github.com/legato/infrastructure/database/dbmodel"
-	"github.com/legato/infrastructure/database/repository/dto"
+	"github.com/hiroyky/legato/domain/errors"
+	"github.com/hiroyky/legato/infrastructure/database/dbmodel"
+	"github.com/hiroyky/legato/infrastructure/database/repository/dto"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 

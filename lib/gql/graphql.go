@@ -3,7 +3,7 @@ package gql
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/legato/domain/errors"
+	"github.com/hiroyky/legato/domain/errors"
 	"strconv"
 	"strings"
 )

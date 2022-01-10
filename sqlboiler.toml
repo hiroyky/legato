@@ -6,7 +6,7 @@ no-tests = true
 
 [mysql]
 dbname="legato_db"
-host="localhost"
+host="legato_mysqldb"
 port=3306
 user="root"
 pass="password"

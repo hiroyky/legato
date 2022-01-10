@@ -1,0 +1,37 @@
+version: '3.3'
+networks:
+  legato_network:
+
+services:
+  legato:
+    image: legato
+    container_name: legato
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: local
+    ports:
+      - 8080:8080
+    tty: true
+    command: air -c ./.air.toml
+    networks:
+      - legato_network
+    volumes:
+      - ./:/go/src/github.com/hiroyky/legato/
+      -  /Users/hirokazu/Music/:/mnt/music
+    platform: linux/amd64
+    depends_on:
+      - mysql
+  mysql:
+    image: mysql:8.0
+    container_name: legato_mysqldb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - ./dbschema/:/docker-entrypoint-initdb.d/
+    ports:
+      - 3306:3306
+    platform: linux/amd64
+    networks:
+      - legato_network

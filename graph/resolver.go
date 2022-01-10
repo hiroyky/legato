@@ -1,6 +1,6 @@
 package graph
 
-import "github.com/legato/infrastructure/database/repository"
+import "github.com/hiroyky/legato/infrastructure/database/repository"
 
 // This file will not be regenerated automatically.
 //

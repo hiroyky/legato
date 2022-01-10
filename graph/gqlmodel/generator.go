@@ -2,9 +2,9 @@ package gqlmodel
 
 import (
 	"fmt"
-	"github.com/legato/infrastructure/config"
-	"github.com/legato/infrastructure/database/dbmodel"
-	"github.com/legato/lib/gql"
+	"github.com/hiroyky/legato/infrastructure/config"
+	"github.com/hiroyky/legato/infrastructure/database/dbmodel"
+	"github.com/hiroyky/legato/lib/gql"
 )
 
 func newPaginationInfo(total int64, count, limit int, offset *int) *PaginationInfo {

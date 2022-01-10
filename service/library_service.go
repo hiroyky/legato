@@ -3,10 +3,10 @@ package service
 import (
 	"context"
 	"github.com/dhowden/tag"
+	"github.com/hiroyky/legato/infrastructure/database/dbmodel"
+	"github.com/hiroyky/legato/infrastructure/database/repository"
+	"github.com/hiroyky/legato/infrastructure/database/repository/dto"
 	"github.com/ktnyt/go-moji"
-	"github.com/legato/infrastructure/database/dbmodel"
-	"github.com/legato/infrastructure/database/repository"
-	"github.com/legato/infrastructure/database/repository/dto"
 	"path/filepath"
 	"strings"
 )
