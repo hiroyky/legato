@@ -17,8 +17,7 @@ services:
     networks:
       - legato_network
     volumes:
-      - ./go.mod:/go/src/gihtub.com/hiroyky/legato/go.mod
-      - ./go.sum:/go/src/gihtub.com/hiroyky/legato/go.sum
+      - ./:/go/src/github.com/hiroyky/legato/
       -  /Users/hirokazu/Music/:/mnt/music
     platform: linux/amd64
     depends_on:
