@@ -21,9 +21,6 @@ gen_sqlboil:
 bash:
 	docker compose --file $(LOCAL_DOCKER_COMPOSE_FILE) exec legato bash
 
-fmt:
-	docker compose --file $(LOCAL_DOCKER_COMPOSE_FILE) exec legato go fmt ./...
-
 test:
 	docker compose --file $(LOCAL_DOCKER_COMPOSE_FILE) exec legato go test ./...
 
@@ -41,3 +38,6 @@ _build_app:
 
 _build_import_sounds:
 	go build -o ./dist/import_sounds ./subsystem/import_sounds
+
+fmt:
+	go fmt ./...
