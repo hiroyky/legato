@@ -4,10 +4,10 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
-	"github.com/legato/graph"
-	"github.com/legato/graph/generated"
-	"github.com/legato/interface/controller"
-	"github.com/legato/registry"
+	"github.com/hiroyky/legato/graph"
+	"github.com/hiroyky/legato/graph/generated"
+	"github.com/hiroyky/legato/interface/controller"
+	"github.com/hiroyky/legato/registry"
 	"net/http"
 )
 

@@ -1,6 +1,6 @@
 package dto
 
-import "github.com/legato/infrastructure/database/dbmodel"
+import "github.com/hiroyky/legato/infrastructure/database/dbmodel"
 
 type TxnInsertTrackDTO struct {
 	Track       *dbmodel.Track

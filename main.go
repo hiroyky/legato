@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/legato/infrastructure/config"
-	"github.com/legato/interface/router"
+	"github.com/hiroyky/legato/infrastructure/config"
+	"github.com/hiroyky/legato/interface/router"
 )
 
 func main() {

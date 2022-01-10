@@ -7,9 +7,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/legato/graph/generated"
-	"github.com/legato/graph/gqlmodel"
-	"github.com/legato/lib/gql"
+	"github.com/hiroyky/legato/graph/generated"
+	"github.com/hiroyky/legato/graph/gqlmodel"
+	"github.com/hiroyky/legato/lib/gql"
 )
 
 func (r *trackResolver) Album(ctx context.Context, obj *gqlmodel.Track) (*gqlmodel.Album, error) {

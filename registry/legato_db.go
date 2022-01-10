@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/legato/infrastructure/config"
+	"github.com/hiroyky/legato/infrastructure/config"
 )
 
 var LegatoDB *sql.DB = nil

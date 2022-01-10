@@ -6,10 +6,10 @@ package graph
 import (
 	"context"
 
-	"github.com/legato/graph/generated"
-	"github.com/legato/graph/gqlmodel"
-	"github.com/legato/infrastructure/database/repository/dto"
-	"github.com/legato/lib/gql"
+	"github.com/hiroyky/legato/graph/generated"
+	"github.com/hiroyky/legato/graph/gqlmodel"
+	"github.com/hiroyky/legato/infrastructure/database/repository/dto"
+	"github.com/hiroyky/legato/lib/gql"
 )
 
 func (r *albumArtistResolver) Albums(ctx context.Context, obj *gqlmodel.AlbumArtist) ([]*gqlmodel.Album, error) {
