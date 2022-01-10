@@ -17,3 +17,5 @@
 .code/
 dist/
 *.bak
+bin/
+tmp/

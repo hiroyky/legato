@@ -1,37 +1,35 @@
 # Makefile
 
-prepare: _prepare_sqlboiler_mysql
+LOCAL_DOCKER_COMPOSE_FILE=./docker-compose.local.yaml
+PROD_DOCKER_COMPOSE_FILE=./docker-compose.prod.yaml
 
-_prepare_sqlboiler_mysql:
-	go get github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql
+init:
+	docker compose --file $(LOCAL_DOCKER_COMPOSE_FILE) build --no-cache
+	docker compose --file $(LOCAL_DOCKER_COMPOSE_FILE) up -d
 
-generate: gen_sqlboil gen_gql
+restart:
+	docker compose --file $(LOCAL_DOCKER_COMPOSE_FILE) stop && docker compose --file $(LOCAL_DOCKER_COMPOSE_FILE)  up -d
+
+gen: gen_sqlboil gen_gql
 
 gen_gql:
-	go run github.com/99designs/gqlgen
+	docker compose --file $(LOCAL_DOCKER_COMPOSE_FILE) exec legato go run github.com/99designs/gqlgen
 
 gen_sqlboil:
-	go run github.com/volatiletech/sqlboiler/v4 mysql
+	docker compose --file $(LOCAL_DOCKER_COMPOSE_FILE) exec legato go run github.com/volatiletech/sqlboiler/v4 mysql
 
-build: _build_app _build_import_sounds
-
-_build_app:
-	go build -o ./dist/app
-
-_build_import_sounds:
-	go build -o ./dist/import_sounds ./subsystem/import_sounds
+bash:
+	docker compose --file $(LOCAL_DOCKER_COMPOSE_FILE) exec legato bash
 
 fmt:
-	go fmt ./...
-
-dev:
-	docker-compose stop
-	docker-compose build
-	docker-compose up -d
-	docker-compose ps
+	docker compose --file $(LOCAL_DOCKER_COMPOSE_FILE) exec legato go fmt ./...
 
 test:
-	go test ./...
+	docker compose --file $(LOCAL_DOCKER_COMPOSE_FILE) exec legato go test ./...
 
 clean:
 	rm -rf $(DST_DIR) ./dist
+
+build_prod:
+	docker compose --file $(PROD_DOCKER_COMPOSE_FILE) build --no-cache
+	docker compose --file $(PROD_DOCKER_COMPOSE_FILE) up -d
