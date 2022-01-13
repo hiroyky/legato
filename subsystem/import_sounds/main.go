@@ -17,7 +17,7 @@ var libraryService = registry.NewLibraryService(context.Background())
 
 func main() {
 	baseDir := flag.String("base-dir", "/mnt/music", "root directory for search.")
-	ext := flag.String("ext", ".mp3,.flac,aac", "extensions of target file. multiple specification is available by comma split.")
+	ext := flag.String("ext", ".mp3,.flac,.aac", "extensions of target file. multiple specification is available by comma split.")
 	flag.Parse()
 
 	extensions := strings.Split(*ext, ",")
