@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+
 	"github.com/hiroyky/legato/graph/generated"
 	"github.com/hiroyky/legato/graph/gqlmodel"
 	"github.com/hiroyky/legato/lib/gql"

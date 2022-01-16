@@ -26,7 +26,7 @@ func (r *queryResolver) Track(ctx context.Context, id string) (*gqlmodel.Track, 
 	return gqlmodel.NewTrack(track), nil
 }
 
-func (r *queryResolver) Tracks(ctx context.Context, limit int, offset *int) (*gqlmodel.TrackPagination, error) {
+func (r *queryResolver) Tracks(ctx context.Context, limit int, offset *int, trackID *string, albumID *string, albumArtist *string, genreID *string) (*gqlmodel.TrackPagination, error) {
 	data := &dto.GetTracksDTO{
 		Limit:  &limit,
 		Offset: offset,
@@ -56,7 +56,7 @@ func (r *queryResolver) Album(ctx context.Context, id string) (*gqlmodel.Album, 
 	return gqlmodel.NewAlbum(album), nil
 }
 
-func (r *queryResolver) Albums(ctx context.Context, limit int, offset *int) (*gqlmodel.AlbumPagination, error) {
+func (r *queryResolver) Albums(ctx context.Context, limit int, offset *int, albumID *string, albumArtistID *string) (*gqlmodel.AlbumPagination, error) {
 	data := &dto.GetAlbumsDTO{
 		Limit:  &limit,
 		Offset: offset,

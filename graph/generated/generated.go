@@ -48,12 +48,13 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Album struct {
-		AlbumArtist func(childComplexity int) int
-		DiskNo      func(childComplexity int) int
-		DiskTotal   func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Name        func(childComplexity int) int
-		Tracks      func(childComplexity int) int
+		AlbumArtist   func(childComplexity int) int
+		AlbumArtistID func(childComplexity int) int
+		DiskNo        func(childComplexity int) int
+		DiskTotal     func(childComplexity int) int
+		ID            func(childComplexity int) int
+		Name          func(childComplexity int) int
+		Tracks        func(childComplexity int) int
 	}
 
 	AlbumArtist struct {
@@ -125,27 +126,30 @@ type ComplexityRoot struct {
 		Album        func(childComplexity int, id string) int
 		AlbumArtist  func(childComplexity int, id string) int
 		AlbumArtists func(childComplexity int, limit int, offset *int) int
-		Albums       func(childComplexity int, limit int, offset *int) int
+		Albums       func(childComplexity int, limit int, offset *int, albumID *string, albumArtistID *string) int
 		Genre        func(childComplexity int, id string) int
 		Genres       func(childComplexity int, limit int, offset *int) int
 		Track        func(childComplexity int, id string) int
-		Tracks       func(childComplexity int, limit int, offset *int) int
+		Tracks       func(childComplexity int, limit int, offset *int, trackID *string, albumID *string, albumArtist *string, genreID *string) int
 	}
 
 	Track struct {
-		Album       func(childComplexity int) int
-		AlbumArtist func(childComplexity int) int
-		Artist      func(childComplexity int) int
-		Comment     func(childComplexity int) int
-		Composer    func(childComplexity int) int
-		DownloadURL func(childComplexity int) int
-		Genre       func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Lyrics      func(childComplexity int) int
-		Title       func(childComplexity int) int
-		TrackNo     func(childComplexity int) int
-		URL         func(childComplexity int) int
-		Year        func(childComplexity int) int
+		Album         func(childComplexity int) int
+		AlbumArtist   func(childComplexity int) int
+		AlbumArtistID func(childComplexity int) int
+		AlbumID       func(childComplexity int) int
+		Artist        func(childComplexity int) int
+		Comment       func(childComplexity int) int
+		Composer      func(childComplexity int) int
+		DownloadURL   func(childComplexity int) int
+		Genre         func(childComplexity int) int
+		GenreID       func(childComplexity int) int
+		ID            func(childComplexity int) int
+		Lyrics        func(childComplexity int) int
+		Title         func(childComplexity int) int
+		TrackNo       func(childComplexity int) int
+		URL           func(childComplexity int) int
+		Year          func(childComplexity int) int
 	}
 
 	TrackEdge struct {
@@ -174,9 +178,9 @@ type GenreResolver interface {
 }
 type QueryResolver interface {
 	Track(ctx context.Context, id string) (*gqlmodel.Track, error)
-	Tracks(ctx context.Context, limit int, offset *int) (*gqlmodel.TrackPagination, error)
+	Tracks(ctx context.Context, limit int, offset *int, trackID *string, albumID *string, albumArtist *string, genreID *string) (*gqlmodel.TrackPagination, error)
 	Album(ctx context.Context, id string) (*gqlmodel.Album, error)
-	Albums(ctx context.Context, limit int, offset *int) (*gqlmodel.AlbumPagination, error)
+	Albums(ctx context.Context, limit int, offset *int, albumID *string, albumArtistID *string) (*gqlmodel.AlbumPagination, error)
 	AlbumArtist(ctx context.Context, id string) (*gqlmodel.AlbumArtist, error)
 	AlbumArtists(ctx context.Context, limit int, offset *int) (*gqlmodel.AlbumArtistPagination, error)
 	Genre(ctx context.Context, id string) (*gqlmodel.Genre, error)
@@ -184,7 +188,9 @@ type QueryResolver interface {
 }
 type TrackResolver interface {
 	Album(ctx context.Context, obj *gqlmodel.Track) (*gqlmodel.Album, error)
+
 	Genre(ctx context.Context, obj *gqlmodel.Track) (*gqlmodel.Genre, error)
+
 	AlbumArtist(ctx context.Context, obj *gqlmodel.Track) (*gqlmodel.AlbumArtist, error)
 }
 
@@ -209,6 +215,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Album.AlbumArtist(childComplexity), true
+
+	case "Album.albumArtistId":
+		if e.complexity.Album.AlbumArtistID == nil {
+			break
+		}
+
+		return e.complexity.Album.AlbumArtistID(childComplexity), true
 
 	case "Album.diskNo":
 		if e.complexity.Album.DiskNo == nil {
@@ -551,7 +564,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Albums(childComplexity, args["limit"].(int), args["offset"].(*int)), true
+		return e.complexity.Query.Albums(childComplexity, args["limit"].(int), args["offset"].(*int), args["albumId"].(*string), args["albumArtistId"].(*string)), true
 
 	case "Query.genre":
 		if e.complexity.Query.Genre == nil {
@@ -599,7 +612,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Tracks(childComplexity, args["limit"].(int), args["offset"].(*int)), true
+		return e.complexity.Query.Tracks(childComplexity, args["limit"].(int), args["offset"].(*int), args["trackId"].(*string), args["albumId"].(*string), args["albumArtist"].(*string), args["genreId"].(*string)), true
 
 	case "Track.album":
 		if e.complexity.Track.Album == nil {
@@ -614,6 +627,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Track.AlbumArtist(childComplexity), true
+
+	case "Track.albumArtistId":
+		if e.complexity.Track.AlbumArtistID == nil {
+			break
+		}
+
+		return e.complexity.Track.AlbumArtistID(childComplexity), true
+
+	case "Track.albumId":
+		if e.complexity.Track.AlbumID == nil {
+			break
+		}
+
+		return e.complexity.Track.AlbumID(childComplexity), true
 
 	case "Track.artist":
 		if e.complexity.Track.Artist == nil {
@@ -649,6 +676,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Track.Genre(childComplexity), true
+
+	case "Track.genreId":
+		if e.complexity.Track.GenreID == nil {
+			break
+		}
+
+		return e.complexity.Track.GenreID(childComplexity), true
 
 	case "Track.id":
 		if e.complexity.Track.ID == nil {
@@ -784,6 +818,7 @@ type Album implements Node {
     name: String!
     diskNo: Int!
     diskTotal: Int!
+    albumArtistId: ID!
     albumArtist: AlbumArtist!
     tracks: [Track]
 }
@@ -888,9 +923,21 @@ type GenrePagination implements Pagination {
 
 type Query {
     track(id: ID!): Track
-    tracks(limit: Int!, offset: Int): TrackPagination!
+    tracks(
+        limit: Int!,
+        offset: Int,
+        trackId: ID,
+        albumId: ID,
+        albumArtist: ID,
+        genreId: ID
+    ): TrackPagination!
     album(id: ID!): Album
-    albums(limit: Int!, offset: Int): AlbumPagination!
+    albums(
+        limit: Int!,
+        offset: Int,
+        albumId: ID,
+        albumArtistId: ID
+    ): AlbumPagination!
     albumArtist(id: ID!): AlbumArtist
     albumArtists(limit: Int!, offset: Int): AlbumArtistPagination!
     genre(id: ID!): Genre
@@ -910,8 +957,11 @@ type Track implements Node {
     year: Int!
     url: String!
     downloadUrl: String!
+    albumId: ID!
     album: Album!
+    genreId: ID!
     genre: Genre!
+    albumArtistId: ID!
     albumArtist: AlbumArtist!
 }
 
@@ -1094,6 +1144,24 @@ func (ec *executionContext) field_Query_albums_args(ctx context.Context, rawArgs
 		}
 	}
 	args["offset"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["albumId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("albumId"))
+		arg2, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["albumId"] = arg2
+	var arg3 *string
+	if tmp, ok := rawArgs["albumArtistId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("albumArtistId"))
+		arg3, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["albumArtistId"] = arg3
 	return args, nil
 }
 
@@ -1172,6 +1240,42 @@ func (ec *executionContext) field_Query_tracks_args(ctx context.Context, rawArgs
 		}
 	}
 	args["offset"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["trackId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("trackId"))
+		arg2, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["trackId"] = arg2
+	var arg3 *string
+	if tmp, ok := rawArgs["albumId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("albumId"))
+		arg3, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["albumId"] = arg3
+	var arg4 *string
+	if tmp, ok := rawArgs["albumArtist"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("albumArtist"))
+		arg4, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["albumArtist"] = arg4
+	var arg5 *string
+	if tmp, ok := rawArgs["genreId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("genreId"))
+		arg5, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["genreId"] = arg5
 	return args, nil
 }
 
@@ -1353,6 +1457,41 @@ func (ec *executionContext) _Album_diskTotal(ctx context.Context, field graphql.
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Album_albumArtistId(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Album) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Album",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AlbumArtistID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Album_albumArtist(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Album) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1385,7 +1524,7 @@ func (ec *executionContext) _Album_albumArtist(ctx context.Context, field graphq
 	}
 	res := resTmp.(*gqlmodel.AlbumArtist)
 	fc.Result = res
-	return ec.marshalNAlbumArtist2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtist(ctx, field.Selections, res)
+	return ec.marshalNAlbumArtist2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtist(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Album_tracks(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Album) (ret graphql.Marshaler) {
@@ -1417,7 +1556,7 @@ func (ec *executionContext) _Album_tracks(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.([]*gqlmodel.Track)
 	fc.Result = res
-	return ec.marshalOTrack2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx, field.Selections, res)
+	return ec.marshalOTrack2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AlbumArtist_id(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.AlbumArtist) (ret graphql.Marshaler) {
@@ -1519,7 +1658,7 @@ func (ec *executionContext) _AlbumArtist_albums(ctx context.Context, field graph
 	}
 	res := resTmp.([]*gqlmodel.Album)
 	fc.Result = res
-	return ec.marshalOAlbum2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx, field.Selections, res)
+	return ec.marshalOAlbum2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AlbumArtist_albumPagination(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.AlbumArtist) (ret graphql.Marshaler) {
@@ -1561,7 +1700,7 @@ func (ec *executionContext) _AlbumArtist_albumPagination(ctx context.Context, fi
 	}
 	res := resTmp.(*gqlmodel.AlbumPagination)
 	fc.Result = res
-	return ec.marshalNAlbumPagination2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumPagination(ctx, field.Selections, res)
+	return ec.marshalNAlbumPagination2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumPagination(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AlbumArtist_trackPagination(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.AlbumArtist) (ret graphql.Marshaler) {
@@ -1603,7 +1742,7 @@ func (ec *executionContext) _AlbumArtist_trackPagination(ctx context.Context, fi
 	}
 	res := resTmp.(*gqlmodel.TrackPagination)
 	fc.Result = res
-	return ec.marshalNTrackPagination2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrackPagination(ctx, field.Selections, res)
+	return ec.marshalNTrackPagination2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrackPagination(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AlbumArtistEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.AlbumArtistEdge) (ret graphql.Marshaler) {
@@ -1673,7 +1812,7 @@ func (ec *executionContext) _AlbumArtistEdge_node(ctx context.Context, field gra
 	}
 	res := resTmp.(*gqlmodel.AlbumArtist)
 	fc.Result = res
-	return ec.marshalNAlbumArtist2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtist(ctx, field.Selections, res)
+	return ec.marshalNAlbumArtist2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtist(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AlbumArtistPagination_pageInfo(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.AlbumArtistPagination) (ret graphql.Marshaler) {
@@ -1708,7 +1847,7 @@ func (ec *executionContext) _AlbumArtistPagination_pageInfo(ctx context.Context,
 	}
 	res := resTmp.(*gqlmodel.PaginationInfo)
 	fc.Result = res
-	return ec.marshalNPaginationInfo2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐPaginationInfo(ctx, field.Selections, res)
+	return ec.marshalNPaginationInfo2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐPaginationInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AlbumArtistPagination_edges(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.AlbumArtistPagination) (ret graphql.Marshaler) {
@@ -1743,7 +1882,7 @@ func (ec *executionContext) _AlbumArtistPagination_edges(ctx context.Context, fi
 	}
 	res := resTmp.([]*gqlmodel.AlbumArtistEdge)
 	fc.Result = res
-	return ec.marshalNAlbumArtistEdge2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistEdgeᚄ(ctx, field.Selections, res)
+	return ec.marshalNAlbumArtistEdge2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistEdgeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AlbumArtistPagination_nodes(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.AlbumArtistPagination) (ret graphql.Marshaler) {
@@ -1778,7 +1917,7 @@ func (ec *executionContext) _AlbumArtistPagination_nodes(ctx context.Context, fi
 	}
 	res := resTmp.([]*gqlmodel.AlbumArtist)
 	fc.Result = res
-	return ec.marshalNAlbumArtist2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistᚄ(ctx, field.Selections, res)
+	return ec.marshalNAlbumArtist2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AlbumEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.AlbumEdge) (ret graphql.Marshaler) {
@@ -1848,7 +1987,7 @@ func (ec *executionContext) _AlbumEdge_node(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*gqlmodel.Album)
 	fc.Result = res
-	return ec.marshalNAlbum2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx, field.Selections, res)
+	return ec.marshalNAlbum2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AlbumPagination_pageInfo(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.AlbumPagination) (ret graphql.Marshaler) {
@@ -1883,7 +2022,7 @@ func (ec *executionContext) _AlbumPagination_pageInfo(ctx context.Context, field
 	}
 	res := resTmp.(*gqlmodel.PaginationInfo)
 	fc.Result = res
-	return ec.marshalNPaginationInfo2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐPaginationInfo(ctx, field.Selections, res)
+	return ec.marshalNPaginationInfo2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐPaginationInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AlbumPagination_edges(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.AlbumPagination) (ret graphql.Marshaler) {
@@ -1918,7 +2057,7 @@ func (ec *executionContext) _AlbumPagination_edges(ctx context.Context, field gr
 	}
 	res := resTmp.([]*gqlmodel.AlbumEdge)
 	fc.Result = res
-	return ec.marshalNAlbumEdge2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumEdgeᚄ(ctx, field.Selections, res)
+	return ec.marshalNAlbumEdge2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumEdgeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AlbumPagination_nodes(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.AlbumPagination) (ret graphql.Marshaler) {
@@ -1953,7 +2092,7 @@ func (ec *executionContext) _AlbumPagination_nodes(ctx context.Context, field gr
 	}
 	res := resTmp.([]*gqlmodel.Album)
 	fc.Result = res
-	return ec.marshalNAlbum2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumᚄ(ctx, field.Selections, res)
+	return ec.marshalNAlbum2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Genre_id(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Genre) (ret graphql.Marshaler) {
@@ -2065,7 +2204,7 @@ func (ec *executionContext) _Genre_trackPagination(ctx context.Context, field gr
 	}
 	res := resTmp.(*gqlmodel.TrackPagination)
 	fc.Result = res
-	return ec.marshalNTrackPagination2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrackPagination(ctx, field.Selections, res)
+	return ec.marshalNTrackPagination2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrackPagination(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _GenreEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.GenreEdge) (ret graphql.Marshaler) {
@@ -2135,7 +2274,7 @@ func (ec *executionContext) _GenreEdge_node(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*gqlmodel.Genre)
 	fc.Result = res
-	return ec.marshalNGenre2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenre(ctx, field.Selections, res)
+	return ec.marshalNGenre2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐGenre(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _GenrePagination_pageInfo(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.GenrePagination) (ret graphql.Marshaler) {
@@ -2170,7 +2309,7 @@ func (ec *executionContext) _GenrePagination_pageInfo(ctx context.Context, field
 	}
 	res := resTmp.(*gqlmodel.PaginationInfo)
 	fc.Result = res
-	return ec.marshalNPaginationInfo2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐPaginationInfo(ctx, field.Selections, res)
+	return ec.marshalNPaginationInfo2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐPaginationInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _GenrePagination_edges(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.GenrePagination) (ret graphql.Marshaler) {
@@ -2205,7 +2344,7 @@ func (ec *executionContext) _GenrePagination_edges(ctx context.Context, field gr
 	}
 	res := resTmp.([]*gqlmodel.GenreEdge)
 	fc.Result = res
-	return ec.marshalNGenreEdge2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenreEdgeᚄ(ctx, field.Selections, res)
+	return ec.marshalNGenreEdge2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐGenreEdgeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _GenrePagination_nodes(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.GenrePagination) (ret graphql.Marshaler) {
@@ -2240,7 +2379,7 @@ func (ec *executionContext) _GenrePagination_nodes(ctx context.Context, field gr
 	}
 	res := resTmp.([]*gqlmodel.Genre)
 	fc.Result = res
-	return ec.marshalNGenre2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenreᚄ(ctx, field.Selections, res)
+	return ec.marshalNGenre2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐGenreᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.PageInfo) (ret graphql.Marshaler) {
@@ -2693,7 +2832,7 @@ func (ec *executionContext) _Query_track(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*gqlmodel.Track)
 	fc.Result = res
-	return ec.marshalOTrack2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx, field.Selections, res)
+	return ec.marshalOTrack2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_tracks(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2721,7 +2860,7 @@ func (ec *executionContext) _Query_tracks(ctx context.Context, field graphql.Col
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Tracks(rctx, args["limit"].(int), args["offset"].(*int))
+		return ec.resolvers.Query().Tracks(rctx, args["limit"].(int), args["offset"].(*int), args["trackId"].(*string), args["albumId"].(*string), args["albumArtist"].(*string), args["genreId"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2735,7 +2874,7 @@ func (ec *executionContext) _Query_tracks(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(*gqlmodel.TrackPagination)
 	fc.Result = res
-	return ec.marshalNTrackPagination2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrackPagination(ctx, field.Selections, res)
+	return ec.marshalNTrackPagination2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrackPagination(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_album(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2774,7 +2913,7 @@ func (ec *executionContext) _Query_album(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*gqlmodel.Album)
 	fc.Result = res
-	return ec.marshalOAlbum2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx, field.Selections, res)
+	return ec.marshalOAlbum2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_albums(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2802,7 +2941,7 @@ func (ec *executionContext) _Query_albums(ctx context.Context, field graphql.Col
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Albums(rctx, args["limit"].(int), args["offset"].(*int))
+		return ec.resolvers.Query().Albums(rctx, args["limit"].(int), args["offset"].(*int), args["albumId"].(*string), args["albumArtistId"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2816,7 +2955,7 @@ func (ec *executionContext) _Query_albums(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(*gqlmodel.AlbumPagination)
 	fc.Result = res
-	return ec.marshalNAlbumPagination2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumPagination(ctx, field.Selections, res)
+	return ec.marshalNAlbumPagination2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumPagination(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_albumArtist(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2855,7 +2994,7 @@ func (ec *executionContext) _Query_albumArtist(ctx context.Context, field graphq
 	}
 	res := resTmp.(*gqlmodel.AlbumArtist)
 	fc.Result = res
-	return ec.marshalOAlbumArtist2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtist(ctx, field.Selections, res)
+	return ec.marshalOAlbumArtist2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtist(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_albumArtists(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2897,7 +3036,7 @@ func (ec *executionContext) _Query_albumArtists(ctx context.Context, field graph
 	}
 	res := resTmp.(*gqlmodel.AlbumArtistPagination)
 	fc.Result = res
-	return ec.marshalNAlbumArtistPagination2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistPagination(ctx, field.Selections, res)
+	return ec.marshalNAlbumArtistPagination2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistPagination(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_genre(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2936,7 +3075,7 @@ func (ec *executionContext) _Query_genre(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*gqlmodel.Genre)
 	fc.Result = res
-	return ec.marshalOGenre2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenre(ctx, field.Selections, res)
+	return ec.marshalOGenre2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐGenre(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_genres(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2978,7 +3117,7 @@ func (ec *executionContext) _Query_genres(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(*gqlmodel.GenrePagination)
 	fc.Result = res
-	return ec.marshalNGenrePagination2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenrePagination(ctx, field.Selections, res)
+	return ec.marshalNGenrePagination2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐGenrePagination(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3402,6 +3541,41 @@ func (ec *executionContext) _Track_downloadUrl(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Track_albumId(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Track) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Track",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AlbumID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Track_album(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Track) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3434,7 +3608,42 @@ func (ec *executionContext) _Track_album(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*gqlmodel.Album)
 	fc.Result = res
-	return ec.marshalNAlbum2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx, field.Selections, res)
+	return ec.marshalNAlbum2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Track_genreId(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Track) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Track",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GenreID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Track_genre(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Track) (ret graphql.Marshaler) {
@@ -3469,7 +3678,42 @@ func (ec *executionContext) _Track_genre(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*gqlmodel.Genre)
 	fc.Result = res
-	return ec.marshalNGenre2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenre(ctx, field.Selections, res)
+	return ec.marshalNGenre2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐGenre(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Track_albumArtistId(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Track) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Track",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AlbumArtistID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Track_albumArtist(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.Track) (ret graphql.Marshaler) {
@@ -3504,7 +3748,7 @@ func (ec *executionContext) _Track_albumArtist(ctx context.Context, field graphq
 	}
 	res := resTmp.(*gqlmodel.AlbumArtist)
 	fc.Result = res
-	return ec.marshalNAlbumArtist2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtist(ctx, field.Selections, res)
+	return ec.marshalNAlbumArtist2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtist(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TrackEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.TrackEdge) (ret graphql.Marshaler) {
@@ -3574,7 +3818,7 @@ func (ec *executionContext) _TrackEdge_node(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*gqlmodel.Track)
 	fc.Result = res
-	return ec.marshalNTrack2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx, field.Selections, res)
+	return ec.marshalNTrack2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TrackPagination_pageInfo(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.TrackPagination) (ret graphql.Marshaler) {
@@ -3609,7 +3853,7 @@ func (ec *executionContext) _TrackPagination_pageInfo(ctx context.Context, field
 	}
 	res := resTmp.(*gqlmodel.PaginationInfo)
 	fc.Result = res
-	return ec.marshalNPaginationInfo2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐPaginationInfo(ctx, field.Selections, res)
+	return ec.marshalNPaginationInfo2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐPaginationInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TrackPagination_edges(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.TrackPagination) (ret graphql.Marshaler) {
@@ -3644,7 +3888,7 @@ func (ec *executionContext) _TrackPagination_edges(ctx context.Context, field gr
 	}
 	res := resTmp.([]*gqlmodel.TrackEdge)
 	fc.Result = res
-	return ec.marshalNTrackEdge2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrackEdgeᚄ(ctx, field.Selections, res)
+	return ec.marshalNTrackEdge2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrackEdgeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TrackPagination_nodes(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.TrackPagination) (ret graphql.Marshaler) {
@@ -3679,7 +3923,7 @@ func (ec *executionContext) _TrackPagination_nodes(ctx context.Context, field gr
 	}
 	res := resTmp.([]*gqlmodel.Track)
 	fc.Result = res
-	return ec.marshalNTrack2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrackᚄ(ctx, field.Selections, res)
+	return ec.marshalNTrack2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrackᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -3817,6 +4061,41 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	res := resTmp.([]introspection.InputValue)
 	fc.Result = res
 	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "__Directive",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsRepeatable, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
@@ -4928,6 +5207,11 @@ func (ec *executionContext) _Album(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "albumArtistId":
+			out.Values[i] = ec._Album_albumArtistId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "albumArtist":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -5577,6 +5861,11 @@ func (ec *executionContext) _Track(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "albumId":
+			out.Values[i] = ec._Track_albumId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "album":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -5591,6 +5880,11 @@ func (ec *executionContext) _Track(ctx context.Context, sel ast.SelectionSet, ob
 				}
 				return res
 			})
+		case "genreId":
+			out.Values[i] = ec._Track_genreId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "genre":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -5605,6 +5899,11 @@ func (ec *executionContext) _Track(ctx context.Context, sel ast.SelectionSet, ob
 				}
 				return res
 			})
+		case "albumArtistId":
+			out.Values[i] = ec._Track_albumArtistId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "albumArtist":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -5724,6 +6023,11 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 			}
 		case "args":
 			out.Values[i] = ec.___Directive_args(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "isRepeatable":
+			out.Values[i] = ec.___Directive_isRepeatable(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -5944,11 +6248,11 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNAlbum2githubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx context.Context, sel ast.SelectionSet, v gqlmodel.Album) graphql.Marshaler {
+func (ec *executionContext) marshalNAlbum2githubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx context.Context, sel ast.SelectionSet, v gqlmodel.Album) graphql.Marshaler {
 	return ec._Album(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAlbum2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.Album) graphql.Marshaler {
+func (ec *executionContext) marshalNAlbum2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.Album) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -5972,7 +6276,7 @@ func (ec *executionContext) marshalNAlbum2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNAlbum2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx, sel, v[i])
+			ret[i] = ec.marshalNAlbum2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -5982,10 +6286,17 @@ func (ec *executionContext) marshalNAlbum2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋ
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
-func (ec *executionContext) marshalNAlbum2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.Album) graphql.Marshaler {
+func (ec *executionContext) marshalNAlbum2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.Album) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -5995,11 +6306,11 @@ func (ec *executionContext) marshalNAlbum2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgql
 	return ec._Album(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAlbumArtist2githubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtist(ctx context.Context, sel ast.SelectionSet, v gqlmodel.AlbumArtist) graphql.Marshaler {
+func (ec *executionContext) marshalNAlbumArtist2githubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtist(ctx context.Context, sel ast.SelectionSet, v gqlmodel.AlbumArtist) graphql.Marshaler {
 	return ec._AlbumArtist(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAlbumArtist2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.AlbumArtist) graphql.Marshaler {
+func (ec *executionContext) marshalNAlbumArtist2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.AlbumArtist) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6023,7 +6334,7 @@ func (ec *executionContext) marshalNAlbumArtist2ᚕᚖgithubᚗcomᚋlegatoᚋgr
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNAlbumArtist2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtist(ctx, sel, v[i])
+			ret[i] = ec.marshalNAlbumArtist2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtist(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6033,10 +6344,17 @@ func (ec *executionContext) marshalNAlbumArtist2ᚕᚖgithubᚗcomᚋlegatoᚋgr
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
-func (ec *executionContext) marshalNAlbumArtist2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtist(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.AlbumArtist) graphql.Marshaler {
+func (ec *executionContext) marshalNAlbumArtist2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtist(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.AlbumArtist) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -6046,7 +6364,7 @@ func (ec *executionContext) marshalNAlbumArtist2ᚖgithubᚗcomᚋlegatoᚋgraph
 	return ec._AlbumArtist(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAlbumArtistEdge2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.AlbumArtistEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNAlbumArtistEdge2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.AlbumArtistEdge) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6070,7 +6388,7 @@ func (ec *executionContext) marshalNAlbumArtistEdge2ᚕᚖgithubᚗcomᚋlegato�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNAlbumArtistEdge2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalNAlbumArtistEdge2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6080,10 +6398,17 @@ func (ec *executionContext) marshalNAlbumArtistEdge2ᚕᚖgithubᚗcomᚋlegato�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
-func (ec *executionContext) marshalNAlbumArtistEdge2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistEdge(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.AlbumArtistEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNAlbumArtistEdge2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistEdge(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.AlbumArtistEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -6093,11 +6418,11 @@ func (ec *executionContext) marshalNAlbumArtistEdge2ᚖgithubᚗcomᚋlegatoᚋg
 	return ec._AlbumArtistEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAlbumArtistPagination2githubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistPagination(ctx context.Context, sel ast.SelectionSet, v gqlmodel.AlbumArtistPagination) graphql.Marshaler {
+func (ec *executionContext) marshalNAlbumArtistPagination2githubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistPagination(ctx context.Context, sel ast.SelectionSet, v gqlmodel.AlbumArtistPagination) graphql.Marshaler {
 	return ec._AlbumArtistPagination(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAlbumArtistPagination2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistPagination(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.AlbumArtistPagination) graphql.Marshaler {
+func (ec *executionContext) marshalNAlbumArtistPagination2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtistPagination(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.AlbumArtistPagination) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -6107,7 +6432,7 @@ func (ec *executionContext) marshalNAlbumArtistPagination2ᚖgithubᚗcomᚋlega
 	return ec._AlbumArtistPagination(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAlbumEdge2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.AlbumEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNAlbumEdge2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.AlbumEdge) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6131,7 +6456,7 @@ func (ec *executionContext) marshalNAlbumEdge2ᚕᚖgithubᚗcomᚋlegatoᚋgrap
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNAlbumEdge2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalNAlbumEdge2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6141,10 +6466,17 @@ func (ec *executionContext) marshalNAlbumEdge2ᚕᚖgithubᚗcomᚋlegatoᚋgrap
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
-func (ec *executionContext) marshalNAlbumEdge2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumEdge(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.AlbumEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNAlbumEdge2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumEdge(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.AlbumEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -6154,11 +6486,11 @@ func (ec *executionContext) marshalNAlbumEdge2ᚖgithubᚗcomᚋlegatoᚋgraph�
 	return ec._AlbumEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAlbumPagination2githubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumPagination(ctx context.Context, sel ast.SelectionSet, v gqlmodel.AlbumPagination) graphql.Marshaler {
+func (ec *executionContext) marshalNAlbumPagination2githubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumPagination(ctx context.Context, sel ast.SelectionSet, v gqlmodel.AlbumPagination) graphql.Marshaler {
 	return ec._AlbumPagination(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAlbumPagination2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumPagination(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.AlbumPagination) graphql.Marshaler {
+func (ec *executionContext) marshalNAlbumPagination2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumPagination(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.AlbumPagination) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -6198,11 +6530,11 @@ func (ec *executionContext) marshalNCursor2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNGenre2githubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenre(ctx context.Context, sel ast.SelectionSet, v gqlmodel.Genre) graphql.Marshaler {
+func (ec *executionContext) marshalNGenre2githubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐGenre(ctx context.Context, sel ast.SelectionSet, v gqlmodel.Genre) graphql.Marshaler {
 	return ec._Genre(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGenre2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenreᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.Genre) graphql.Marshaler {
+func (ec *executionContext) marshalNGenre2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐGenreᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.Genre) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6226,7 +6558,7 @@ func (ec *executionContext) marshalNGenre2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNGenre2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenre(ctx, sel, v[i])
+			ret[i] = ec.marshalNGenre2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐGenre(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6236,10 +6568,17 @@ func (ec *executionContext) marshalNGenre2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋ
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
-func (ec *executionContext) marshalNGenre2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenre(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.Genre) graphql.Marshaler {
+func (ec *executionContext) marshalNGenre2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐGenre(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.Genre) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -6249,7 +6588,7 @@ func (ec *executionContext) marshalNGenre2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgql
 	return ec._Genre(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGenreEdge2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenreEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.GenreEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNGenreEdge2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐGenreEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.GenreEdge) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6273,7 +6612,7 @@ func (ec *executionContext) marshalNGenreEdge2ᚕᚖgithubᚗcomᚋlegatoᚋgrap
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNGenreEdge2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenreEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalNGenreEdge2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐGenreEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6283,10 +6622,17 @@ func (ec *executionContext) marshalNGenreEdge2ᚕᚖgithubᚗcomᚋlegatoᚋgrap
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
-func (ec *executionContext) marshalNGenreEdge2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenreEdge(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.GenreEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNGenreEdge2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐGenreEdge(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.GenreEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -6296,11 +6642,11 @@ func (ec *executionContext) marshalNGenreEdge2ᚖgithubᚗcomᚋlegatoᚋgraph�
 	return ec._GenreEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGenrePagination2githubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenrePagination(ctx context.Context, sel ast.SelectionSet, v gqlmodel.GenrePagination) graphql.Marshaler {
+func (ec *executionContext) marshalNGenrePagination2githubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐGenrePagination(ctx context.Context, sel ast.SelectionSet, v gqlmodel.GenrePagination) graphql.Marshaler {
 	return ec._GenrePagination(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGenrePagination2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenrePagination(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.GenrePagination) graphql.Marshaler {
+func (ec *executionContext) marshalNGenrePagination2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐGenrePagination(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.GenrePagination) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -6340,7 +6686,7 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNPaginationInfo2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐPaginationInfo(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.PaginationInfo) graphql.Marshaler {
+func (ec *executionContext) marshalNPaginationInfo2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐPaginationInfo(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.PaginationInfo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -6365,7 +6711,7 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNTrack2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrackᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.Track) graphql.Marshaler {
+func (ec *executionContext) marshalNTrack2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrackᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.Track) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6389,7 +6735,7 @@ func (ec *executionContext) marshalNTrack2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNTrack2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx, sel, v[i])
+			ret[i] = ec.marshalNTrack2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6399,10 +6745,17 @@ func (ec *executionContext) marshalNTrack2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋ
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
-func (ec *executionContext) marshalNTrack2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.Track) graphql.Marshaler {
+func (ec *executionContext) marshalNTrack2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.Track) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -6412,7 +6765,7 @@ func (ec *executionContext) marshalNTrack2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgql
 	return ec._Track(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTrackEdge2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrackEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.TrackEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNTrackEdge2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrackEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.TrackEdge) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6436,7 +6789,7 @@ func (ec *executionContext) marshalNTrackEdge2ᚕᚖgithubᚗcomᚋlegatoᚋgrap
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNTrackEdge2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrackEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalNTrackEdge2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrackEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6446,10 +6799,17 @@ func (ec *executionContext) marshalNTrackEdge2ᚕᚖgithubᚗcomᚋlegatoᚋgrap
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
-func (ec *executionContext) marshalNTrackEdge2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrackEdge(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.TrackEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNTrackEdge2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrackEdge(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.TrackEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -6459,11 +6819,11 @@ func (ec *executionContext) marshalNTrackEdge2ᚖgithubᚗcomᚋlegatoᚋgraph�
 	return ec._TrackEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTrackPagination2githubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrackPagination(ctx context.Context, sel ast.SelectionSet, v gqlmodel.TrackPagination) graphql.Marshaler {
+func (ec *executionContext) marshalNTrackPagination2githubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrackPagination(ctx context.Context, sel ast.SelectionSet, v gqlmodel.TrackPagination) graphql.Marshaler {
 	return ec._TrackPagination(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTrackPagination2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrackPagination(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.TrackPagination) graphql.Marshaler {
+func (ec *executionContext) marshalNTrackPagination2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrackPagination(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.TrackPagination) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -6511,6 +6871,13 @@ func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgq
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -6584,6 +6951,13 @@ func (ec *executionContext) marshalN__DirectiveLocation2ᚕstringᚄ(ctx context
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -6633,6 +7007,13 @@ func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -6674,6 +7055,13 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -6702,7 +7090,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOAlbum2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.Album) graphql.Marshaler {
+func (ec *executionContext) marshalOAlbum2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.Album) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -6729,7 +7117,7 @@ func (ec *executionContext) marshalOAlbum2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOAlbum2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx, sel, v[i])
+			ret[i] = ec.marshalOAlbum2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6739,17 +7127,18 @@ func (ec *executionContext) marshalOAlbum2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋ
 
 	}
 	wg.Wait()
+
 	return ret
 }
 
-func (ec *executionContext) marshalOAlbum2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.Album) graphql.Marshaler {
+func (ec *executionContext) marshalOAlbum2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbum(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.Album) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Album(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOAlbumArtist2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtist(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.AlbumArtist) graphql.Marshaler {
+func (ec *executionContext) marshalOAlbumArtist2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐAlbumArtist(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.AlbumArtist) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -6795,11 +7184,26 @@ func (ec *executionContext) marshalOCursor2ᚖstring(ctx context.Context, sel as
 	return graphql.MarshalString(*v)
 }
 
-func (ec *executionContext) marshalOGenre2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐGenre(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.Genre) graphql.Marshaler {
+func (ec *executionContext) marshalOGenre2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐGenre(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.Genre) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Genre(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalID(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalID(*v)
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
@@ -6841,7 +7245,7 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return graphql.MarshalString(*v)
 }
 
-func (ec *executionContext) marshalOTrack2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.Track) graphql.Marshaler {
+func (ec *executionContext) marshalOTrack2ᚕᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx context.Context, sel ast.SelectionSet, v []*gqlmodel.Track) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -6868,7 +7272,7 @@ func (ec *executionContext) marshalOTrack2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOTrack2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx, sel, v[i])
+			ret[i] = ec.marshalOTrack2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6878,10 +7282,11 @@ func (ec *executionContext) marshalOTrack2ᚕᚖgithubᚗcomᚋlegatoᚋgraphᚋ
 
 	}
 	wg.Wait()
+
 	return ret
 }
 
-func (ec *executionContext) marshalOTrack2ᚖgithubᚗcomᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.Track) graphql.Marshaler {
+func (ec *executionContext) marshalOTrack2ᚖgithubᚗcomᚋhiroykyᚋlegatoᚋgraphᚋgqlmodelᚐTrack(ctx context.Context, sel ast.SelectionSet, v *gqlmodel.Track) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -6925,6 +7330,13 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -6965,6 +7377,13 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -7005,6 +7424,13 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -7052,6 +7478,13 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
