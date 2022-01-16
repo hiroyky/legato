@@ -7,7 +7,6 @@ import (
 	"github.com/hiroyky/legato/domain/request"
 	"github.com/hiroyky/legato/infrastructure/database/repository"
 	"github.com/hiroyky/legato/registry"
-	"io/ioutil"
 	"net/http"
 	"path"
 )
@@ -41,12 +40,7 @@ func (c *musicController) GetMusic(ctx *gin.Context) {
 		return
 	}
 
-	buf, err := ioutil.ReadFile(track.FilePath)
-	if err != nil {
-		ctx.Status(http.StatusInternalServerError)
-	}
-	ctx.Writer.Header().Set("Content-Length", fmt.Sprintf("%d", len(buf)))
-	ctx.Writer.Write(buf)
+	http.ServeFile(ctx.Writer, ctx.Request, track.FilePath)
 }
 
 func (c *musicController) GetDownloadMusic(ctx *gin.Context) {
@@ -66,11 +60,6 @@ func (c *musicController) GetDownloadMusic(ctx *gin.Context) {
 		return
 	}
 
-	buf, err := ioutil.ReadFile(track.FilePath)
-	if err != nil {
-		ctx.Status(http.StatusInternalServerError)
-	}
 	ctx.Writer.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", path.Base(track.FilePath)))
-	ctx.Writer.Header().Set("Content-Length", fmt.Sprintf("%d", len(buf)))
-	ctx.Writer.Write(buf)
+	http.ServeFile(ctx.Writer, ctx.Request, track.FilePath)
 }
