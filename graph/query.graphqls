@@ -7,7 +7,7 @@ type Query {
         offset: Int,
         trackId: ID,
         albumId: ID,
-        albumArtist: ID,
+        albumArtistId: ID,
         genreId: ID
     ): TrackPagination!
     album(id: ID!): Album

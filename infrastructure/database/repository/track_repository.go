@@ -10,7 +10,7 @@ import (
 )
 
 type TrackRepository interface {
-	GetByID(ctx context.Context, trackID int64) (*dbmodel.Track, error)
+	GetByID(ctx context.Context, trackID int) (*dbmodel.Track, error)
 	GetByFilePath(ctx context.Context, filePath string) (*dbmodel.Track, error)
 	GetByFilePathHash(ctx context.Context, filePathHash string) (*dbmodel.Track, error)
 	GetTracks(ctx context.Context, data *dto.GetTracksDTO) (dbmodel.TrackSlice, error)
@@ -27,8 +27,8 @@ type trackRepository struct {
 	db sqlExecutor
 }
 
-func (r *trackRepository) GetByID(ctx context.Context, trackID int64) (*dbmodel.Track, error) {
-	track, err := dbmodel.FindTrack(ctx, r.db, int(trackID))
+func (r *trackRepository) GetByID(ctx context.Context, trackID int) (*dbmodel.Track, error) {
+	track, err := dbmodel.FindTrack(ctx, r.db, trackID)
 	if err == sql.ErrNoRows {
 		return nil, errors.New(errors.TrackNotFoundError, nil)
 	}

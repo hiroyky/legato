@@ -10,7 +10,7 @@ import (
 )
 
 type AlbumRepository interface {
-	GetByID(ctx context.Context, albumID int64) (*dbmodel.Album, error)
+	GetByID(ctx context.Context, albumID int) (*dbmodel.Album, error)
 	GetByName(ctx context.Context, name string) (*dbmodel.Album, error)
 	GetAlbums(ctx context.Context, data *dto.GetAlbumsDTO) (dbmodel.AlbumSlice, error)
 	CountAlbums(ctx context.Context, data *dto.GetAlbumsDTO) (int64, error)
@@ -24,7 +24,7 @@ type albumRepository struct {
 	db sqlExecutor
 }
 
-func (r *albumRepository) GetByID(ctx context.Context, albumID int64) (*dbmodel.Album, error) {
+func (r *albumRepository) GetByID(ctx context.Context, albumID int) (*dbmodel.Album, error) {
 	album, err := dbmodel.FindAlbum(ctx, r.db, int(albumID))
 	if err != nil {
 		return nil, errors.New(errors.GetAlbumFatal, err)

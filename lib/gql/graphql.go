@@ -16,7 +16,7 @@ func EncodeID(filedName string, rawID int) string {
 	return base64.StdEncoding.EncodeToString([]byte(format))
 }
 
-func DecodeID(graphID string) (int64, error) {
+func DecodeID(graphID string) (int, error) {
 	decoded, err := base64.StdEncoding.DecodeString(graphID)
 	if err != nil {
 		return 0, errors.Wrap(err, fmt.Sprintf("Failed decode GraphQL ID: %s", graphID))
@@ -30,10 +30,10 @@ func DecodeID(graphID string) (int64, error) {
 	if err != nil {
 		return 0, errors.Wrap(err, fmt.Sprintf("Failed decode GraphQL ID: %s", graphID))
 	}
-	return int64(id), nil
+	return id, nil
 }
 
-func DecodeIDIfNotNil(graphID *string) (*int64, error) {
+func DecodeIDIfNotNil(graphID *string) (*int, error) {
 	if graphID == nil {
 		return nil, nil
 	}
