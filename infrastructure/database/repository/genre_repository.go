@@ -9,7 +9,7 @@ import (
 )
 
 type GenreRepository interface {
-	GetByID(ctx context.Context, genreID int64) (*dbmodel.Genre, error)
+	GetByID(ctx context.Context, genreID int) (*dbmodel.Genre, error)
 	GetByName(ctx context.Context, name string) (*dbmodel.Genre, error)
 	GetGenres(ctx context.Context, data *dto.GetGenresDTO) (dbmodel.GenreSlice, error)
 	CountGenres(ctx context.Context, data *dto.GetGenresDTO) (int64, error)
@@ -23,8 +23,8 @@ type genreRepository struct {
 	db sqlExecutor
 }
 
-func (r *genreRepository) GetByID(ctx context.Context, genreID int64) (*dbmodel.Genre, error) {
-	genre, err := dbmodel.FindGenre(ctx, r.db, int(genreID))
+func (r *genreRepository) GetByID(ctx context.Context, genreID int) (*dbmodel.Genre, error) {
+	genre, err := dbmodel.FindGenre(ctx, r.db, genreID)
 	if err != nil {
 
 	}

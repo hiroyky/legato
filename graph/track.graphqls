@@ -11,8 +11,11 @@ type Track implements Node {
     year: Int!
     url: String!
     downloadUrl: String!
+    albumId: ID!
     album: Album!
+    genreId: ID!
     genre: Genre!
+    albumArtistId: ID!
     albumArtist: AlbumArtist!
 }
 

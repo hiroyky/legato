@@ -2,9 +2,21 @@
 
 type Query {
     track(id: ID!): Track
-    tracks(limit: Int!, offset: Int): TrackPagination!
+    tracks(
+        limit: Int!,
+        offset: Int,
+        trackId: ID,
+        albumId: ID,
+        albumArtistId: ID,
+        genreId: ID
+    ): TrackPagination!
     album(id: ID!): Album
-    albums(limit: Int!, offset: Int): AlbumPagination!
+    albums(
+        limit: Int!,
+        offset: Int,
+        albumId: ID,
+        albumArtistId: ID
+    ): AlbumPagination!
     albumArtist(id: ID!): AlbumArtist
     albumArtists(limit: Int!, offset: Int): AlbumArtistPagination!
     genre(id: ID!): Genre

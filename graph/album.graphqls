@@ -5,6 +5,7 @@ type Album implements Node {
     name: String!
     diskNo: Int!
     diskTotal: Int!
+    albumArtistId: ID!
     albumArtist: AlbumArtist!
     tracks: [Track]
 }
